@@ -40,9 +40,10 @@ $ vagrant reload
 ```
 
 ### Via Vagrant-only
-If you want to use Vagrant standalone, create a **nodes** directory and use the supplied Vagrantfile:
+If you want to use Vagrant standalone, create a **nodes** directory and use the supplied Vagrantfile from the **test** directory:
 
 ```
+$ cd ../../
 $ mkdir nodes
 $ vagrant up --provision
 ```
