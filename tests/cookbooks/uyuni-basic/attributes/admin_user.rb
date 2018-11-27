@@ -1,0 +1,5 @@
+default['uyuni']['admin_user'] = 'admin'
+default['uyuni']['admin_pass'] = 'pass'
+default['uyuni']['admin_mail'] = 'uyuni@vagrantup.com'
+default['uyuni']['admin_name'] = 'Arthur'
+default['uyuni']['admin_surname'] = 'Admin'
