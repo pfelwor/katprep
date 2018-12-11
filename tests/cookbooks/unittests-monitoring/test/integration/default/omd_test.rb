@@ -5,6 +5,9 @@
 # OMD sites
 omd_sites = ['mon_nagios', 'mon_icinga', 'mon_naemon', 'mon_icinga2']
 config_extension = {'nagios' => 'cfg', 'icinga' => 'cfg', 'naemon' => 'cfg', 'icinga2' => 'conf'}
+url = {'nagios' => 'nagios', 'icinga' => 'icinga', 'naemon' => 'thruk', 'icinga2' => 'thruk'}
+omd_username = 'omdadmin'
+omd_password = 'omd'
 
 # YUM repository
 control 'katprep-unittests-mon-01' do
@@ -63,6 +66,9 @@ control 'katprep-unittests-mon-04' do
       its('group') { should eq site }
       its('mode') { should cmp '0644' }
     end
+    describe file("/opt/omd/sites/mon_nagios/etc/apache/conf.d/disable_nagios.conf") do
+      it { should_not exist }
+    end
   end
 end
 
@@ -73,5 +79,18 @@ control 'katprep-unittests-mon-06' do
   desc   'Ensure that web server is listening for requests'
   describe port(80) do
     it { should be_listening }
+  end
+end
+
+# ensure that http sites are accessible via HTTP Basic
+control 'katprep-unittests-mon-07' do
+  impact 1.0
+  title  'Site login possible'
+  desc   'Ensure that site logins are possible'
+  omd_sites.each do |site|
+    short_name = site[site.index('_')+1..-1]
+    describe http("https://localhost/#{site}/#{url[short_name]}/", auth: {user: omd_username, pass: omd_password}, ssl_verify: false) do
+      its('status') { should eq 200 }
+    end
   end
 end

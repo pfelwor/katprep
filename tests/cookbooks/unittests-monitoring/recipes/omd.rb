@@ -5,7 +5,10 @@
 # Copyright:: 2018, Christian Stankowic, GPL 3.0.
 
 # OMD sites
-omd_sites = ['mon_nagios', 'mon_icinga', 'mon_icinga2', 'mon_naemon']
+omd_sites = ['mon_nagios', 'mon_icinga', 'mon_naemon', 'mon_icinga2']
+config_family = {'nagios' => 'nagios', 'icinga' => 'nagios', 'naemon' => 'nagios', 'icinga2' => 'icinga2'}
+config_extension = {'nagios' => 'cfg', 'icinga' => 'cfg', 'naemon' => 'cfg', 'icinga2' => 'conf'}
+# never _ever_ change order here as really bad things will happen then
 
 # add EPEL repository (for dependencies)
 yum_package 'epel-release'
@@ -24,6 +27,7 @@ yum_package 'omd-labs-edition'
 omd_sites.each do |site|
   execute "omd-create-#{site}" do
     command "/bin/omd create #{site}"
+    # we need to ignore failures as we want to be able to converge multiple times
     ignore_failure true
   end
 end
@@ -39,21 +43,18 @@ omd_sites.each do |site|
 end
 
 # add OMD monitoring configuration
-['mon_nagios', 'mon_icinga', 'mon_naemon'].each do |site|
+omd_sites.each do |site|
   short_name = site[site.index('_')+1..-1]
-  template("/opt/omd/sites/#{site}/etc/#{short_name}/conf.d/katprep_demo.cfg") do
-    source 'nagios_katprep_demo.cfg'
+  template("/opt/omd/sites/#{site}/etc/#{short_name}/conf.d/katprep_demo.#{config_extension[short_name]}") do
+    source "#{config_family[short_name]}_katprep_demo.#{config_extension[short_name]}"
     owner site
     group site
     mode '0644'
   end
 end
-#Icinga2
-template("/opt/omd/sites/mon_icinga2/etc/icinga2/conf.d/katprep_demo.conf") do
-  source 'icinga2_katprep_demo.conf'
-  owner 'mon_icinga2'
-  group 'mon_icinga2'
-  mode '0644'
+# yep, we want to have insecure Nagios stuff
+file("/opt/omd/sites/mon_nagios/etc/apache/conf.d/disable_nagios.conf") do
+  action [:delete]
 end
 
 # enable/restart OMD service
