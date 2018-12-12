@@ -52,9 +52,23 @@ omd_sites.each do |site|
     mode '0644'
   end
 end
+
 # yep, we want to have insecure Nagios stuff
 file("/opt/omd/sites/mon_nagios/etc/apache/conf.d/disable_nagios.conf") do
   action [:delete]
+end
+
+# Icinga2 API user
+template("/opt/omd/sites/mon_icinga2/etc/icinga2/conf.d/api-omd.conf") do
+  source 'api-omd.conf'
+  owner 'mon_icinga2'
+  group 'mon_icinga2'
+  mode '0644'
+end
+execute "omd-icinga2-api" do
+  user 'root'
+  # yep, kinda ugly - but it works
+  command 'su - mon_icinga2 -c "icinga2 api setup"'
 end
 
 # enable/restart OMD service

@@ -94,3 +94,13 @@ control 'katprep-unittests-mon-07' do
     end
   end
 end
+
+# ensure that Icinga2 API is working
+control 'katprep-unittests-mon-08' do
+  impact 1.0
+  title  'Icinga2 API working'
+  desc   'Ensure that Icinga2 API login is possible'
+  describe http("https://localhost:5665/v1/status", auth: {user: omd_username, pass: omd_password}, ssl_verify: false) do
+    its('status') { should eq 200 }
+  end
+end
