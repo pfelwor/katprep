@@ -5,6 +5,7 @@
 # OMD sites
 omd_sites = ['mon_nagios', 'mon_icinga', 'mon_naemon', 'mon_icinga2']
 config_extension = {'nagios' => 'cfg', 'icinga' => 'cfg', 'naemon' => 'cfg', 'icinga2' => 'conf'}
+config_frontend = {'nagios' => 'nagios', 'icinga' => 'icinga', 'naemon' => 'thruk', 'icinga2' => 'thruk'}
 url = {'nagios' => 'nagios', 'icinga' => 'icinga', 'naemon' => 'thruk', 'icinga2' => 'thruk'}
 omd_username = 'omdadmin'
 omd_password = 'omd'
@@ -54,18 +55,28 @@ control 'katprep-unittests-mon-04' do
 end
 
 # ensure that OMD site configuration files are created
-control 'katprep-unittests-mon-04' do
+control 'katprep-unittests-mon-05' do
   impact 1.0
-  title  'OMD sites healthy'
-  desc   'Ensure that OMD sites are healthy'
+  title  'OMD sites configured'
+  desc   'Ensure that OMD sites are configured properly'
   omd_sites.each do |site|
     short_name = site[site.index('_')+1..-1]
-    describe file("/opt/omd/sites/#{site}/etc/#{short_name}/conf.d/katprep_demo.#{config_extension[short_name]}") do
-      its('size') { should > 100 }
-      its('owner') { should eq site }
-      its('group') { should eq site }
-      its('mode') { should cmp '0644' }
+    # core
+    describe command("omd config #{site} show CORE") do
+      its('exit_status') { should eq 0 }
+      its('stdout.strip') { should eq short_name }
     end
+    # thruk cookie authentication
+    describe command("omd config #{site} show THRUK_COOKIE_AUTH") do
+      its('exit_status') { should eq 0 }
+      its('stdout.strip') { should eq 'off' }
+    end
+    # default frontend
+    describe command("omd config #{site} show DEFAULT_GUI") do
+      its('exit_status') { should eq 0 }
+      its('stdout.strip') { should eq config_frontend[short_name] }
+    end
+    # insecure Nagios CGIs
     describe file("/opt/omd/sites/mon_nagios/etc/apache/conf.d/disable_nagios.conf") do
       it { should_not exist }
     end

@@ -8,6 +8,7 @@
 omd_sites = ['mon_nagios', 'mon_icinga', 'mon_naemon', 'mon_icinga2']
 config_family = {'nagios' => 'nagios', 'icinga' => 'nagios', 'naemon' => 'nagios', 'icinga2' => 'icinga2'}
 config_extension = {'nagios' => 'cfg', 'icinga' => 'cfg', 'naemon' => 'cfg', 'icinga2' => 'conf'}
+config_frontend = {'nagios' => 'nagios', 'icinga' => 'icinga', 'naemon' => 'thruk', 'icinga2' => 'thruk'}
 # never _ever_ change order here as really bad things will happen then
 
 # add EPEL repository (for dependencies)
@@ -32,13 +33,23 @@ omd_sites.each do |site|
   end
 end
 
-# add OMD site configurations
+# configure sites
 omd_sites.each do |site|
-  template("/opt/omd/sites/#{site}/etc/omd/site.conf") do
-    source "site.conf.#{site}"
-    owner site
-    group site
-    mode '0644'
+  short_name = site[site.index('_')+1..-1]
+  execute "config-core-#{site}" do
+    user 'root'
+    # set core
+    command "omd config #{site} set CORE #{short_name}"
+  end
+  execute "config-gui-#{site}" do
+    user 'root'
+    # set frontend
+    command "omd config #{site} set DEFAULT_GUI #{config_frontend[short_name]}"
+  end
+  execute "config-auth-#{site}" do
+    user 'root'
+    # disable thruk authentication
+    command "omd config #{site} set THRUK_COOKIE_AUTH off"
   end
 end
 
@@ -65,7 +76,7 @@ template("/opt/omd/sites/mon_icinga2/etc/icinga2/conf.d/api-omd.conf") do
   group 'mon_icinga2'
   mode '0644'
 end
-execute "omd-icinga2-api" do
+execute "omd-mon_icinga2-api" do
   user 'root'
   # yep, kinda ugly - but it works
   command 'su - mon_icinga2 -c "icinga2 api setup"'
