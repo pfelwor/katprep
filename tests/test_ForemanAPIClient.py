@@ -182,7 +182,7 @@ def test_get_hostparams(client, config):
     assert hostparams
 
 
-def test_get_hostparams_invalid(client, config):
+def test_get_hostparams_invalid(client):
     """
     Ensure that host params cannot be retrieved by supplying invalid IDs
     """

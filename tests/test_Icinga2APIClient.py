@@ -60,7 +60,7 @@ def test_scheduling_downtime_for_host(client, config):
     assert client.remove_downtime(host, "host")
 
 
-def test_sched_dt_host_fail(client, config):
+def test_sched_dt_host_fail(client):
     """
     Ensure that host downtimes cannot be scheduled when using invalid hosts
     """

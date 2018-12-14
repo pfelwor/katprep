@@ -13,4 +13,4 @@ def load_config(config_file):
         with open(config_file, "r") as json_file:
             return json.load(json_file)
     except IOError as err:
-        pytest.skip("Unable to read configuration file: '%s'", err)
+        pytest.skip("Unable to read configuration file: '%s'" % err)
