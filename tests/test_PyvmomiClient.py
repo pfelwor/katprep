@@ -6,8 +6,8 @@ Unit tests for Pyvmomi integration
 from __future__ import absolute_import
 
 import logging
-import pytest
 import time
+import pytest
 from katprep.clients.PyvmomiClient import PyvmomiClient
 from katprep.clients import SessionException, InvalidCredentialsException, EmptySetException
 
@@ -17,11 +17,22 @@ from .utilities import load_config
 # scope used to reuse the same fixture for all tests
 @pytest.fixture(scope="session")
 def config():
+    """
+    Loads the configuration file
+
+    :return: JSON object
+    """
     return load_config("pyvmomi_config.json")
 
 
 @pytest.fixture
 def client(config):
+    """
+    Instances a Pyvmomi client
+
+    :param config: configuration
+    :return: PyvmomiClient object
+    """
     try:
         yield PyvmomiClient(
             logging.ERROR,

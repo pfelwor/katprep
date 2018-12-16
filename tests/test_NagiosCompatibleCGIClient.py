@@ -21,16 +21,32 @@ from .utilities import load_config
     ids=["Icinga 1", "Nagios"]
 )
 def nagios_type(request):
+    """
+    Returns Nagios type
+    :param request: request
+    :return: parameter
+    """
     return request.param
 
 
 @pytest.fixture(scope='session')
 def config():
+    """
+    Loads the configuration
+    :return: JSON object
+    """
     return load_config("nagios_config.json")
 
 
 @pytest.fixture
 def monitoring_client(config, nagios_type):
+    """
+    Instances a monitoring client
+
+    :param config: configuration object
+    :param nagios_type: Nagios type
+    :return: NagiosCGIClient
+    """
     try:
         yield NagiosCGIClient(
             logging.ERROR,
@@ -45,6 +61,12 @@ def monitoring_client(config, nagios_type):
 
 @pytest.fixture
 def icinga_client(config):
+    """
+    Instances a Icinga client
+
+    :param config: configuration object
+    :return: NagiosCGIClient
+    """
     try:
         yield NagiosCGIClient(
             logging.ERROR,
@@ -59,6 +81,12 @@ def icinga_client(config):
 
 @pytest.fixture
 def nagios_client(config):
+    """
+    Instances a Nagios client
+
+    :param config: configuration object
+    :return: NagiosCGIClient
+    """
     try:
         yield NagiosCGIClient(
             logging.ERROR,

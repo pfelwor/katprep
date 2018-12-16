@@ -7,9 +7,9 @@ Unit tests for Spacewalk API integration
 from __future__ import absolute_import
 
 import logging
+import ssl
 import mock
 import pytest
-import ssl
 from katprep.clients.SpacewalkAPIClient import SpacewalkAPIClient
 from katprep.clients import (APILevelNotSupportedException,
                              InvalidCredentialsException)
@@ -19,11 +19,23 @@ from .utilities import load_config
 
 @pytest.fixture(scope='session')
 def config():
+    """
+    Loads the configuration
+
+    :return: JSON object
+    """
     return load_config("spw_config.json")
 
 
 @pytest.fixture
 def client(config):
+    """
+    Instances the Spacewalk API client
+
+    :param config: configuration file
+    :type config: JSON object
+    :return: Spacewalk API client object
+    """
     # TODO: Instance client
     pytest.skip('Diggi, bau mich ein!')
 

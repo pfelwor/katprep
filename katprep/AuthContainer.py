@@ -9,8 +9,7 @@ import os
 import stat
 import json
 import base64
-from cryptography.fernet import Fernet
-from cryptography.fernet import InvalidToken
+from cryptography.fernet import Fernet, InvalidToken
 
 try:
     from urllib.parse import urlparse
@@ -25,7 +24,6 @@ class ContainerException(Exception):
 .. class:: ContainerException
     """
     pass
-
 
 
 class AuthContainer:
@@ -59,19 +57,17 @@ class AuthContainer:
         :param filename: filename
         :type filename: str
         """
-        #set logging
+        # set logging
         self.LOGGER.setLevel(log_level)
-        #set key if defined
+        # set key if defined
         if key:
             self.set_key(key)
-        #set filename and import data
+        # set filename and import data
         self.FILENAME = filename
         try:
             self.__import()
         except ValueError:
             pass
-
-
 
     def set_key(self, key):
         """
@@ -81,39 +77,30 @@ class AuthContainer:
         :type key: str
         """
         try:
-            #fill up to 32 chars
+            # fill up to 32 chars
             key = key.zfill(32)[-32:]
-            #set key
+            # set key
             self.KEY = base64.b64encode(key)
-        except ValueError as err:
+        except ValueError:
             self.LOGGER.error("Empty password specified")
-
-
 
     def is_encrypted(self):
         """
         This functions returns whether the authentication container is
         encrypted.
         """
-        if self.KEY:
-            return True
-        else:
-            return False
-
-
+        return bool(self.KEY)
 
     def __import(self):
         """This function imports definitions from the file."""
         global CREDENTIALS
 
         if os.path.exists(self.FILENAME) and \
-            oct(stat.S_IMODE(os.lstat(self.FILENAME).st_mode)) == "0600":
-            #loading file
+                oct(stat.S_IMODE(os.lstat(self.FILENAME).st_mode)) == "0600":
+            # loading file
             self.CREDENTIALS = json.loads(self.get_json(self.FILENAME))
         else:
             raise ValueError("File non-existent or file mode not 0600!")
-
-
 
     def get_json(self, filename):
         """
@@ -127,9 +114,7 @@ class AuthContainer:
                 json_data = json_file.read().replace("\n", "")
             return json_data
         except IOError as err:
-            self.LOGGER.error("Unable to read file '{}': '{}'".format(filename, err))
-
-
+            self.LOGGER.error("Unable to read file '%s': '%s'", filename, err)
 
     def save(self):
         """
@@ -139,15 +124,13 @@ class AuthContainer:
             with open(self.FILENAME, 'w') as target:
                 target.write(json.dumps(self.CREDENTIALS))
 
-            #setting the good perms
+            # setting the good perms
             os.chmod(self.FILENAME, 0o600)
         except IOError as err:
             raise ContainerException(err)
 
-
-
     def __manage_credentials(self, hostname, username, password,
-        remove_entry=False):
+                             remove_entry=False):
         """
         This functions adds or removes credentials to/from the authentication
         container.
@@ -171,13 +154,13 @@ class AuthContainer:
 
         try:
             if remove_entry:
-                #remove entry
+                # remove entry
                 del self.CREDENTIALS[hostname]
             else:
-                #add entry
+                # add entry
                 self.CREDENTIALS[hostname] = {}
                 self.CREDENTIALS[hostname]["username"] = username
-                #add encrypted or plain password
+                # add encrypted or plain password
                 if self.KEY:
                     crypto = Fernet(self.KEY)
                     self.CREDENTIALS[hostname]["password"] = "s/{0}".format(
@@ -189,7 +172,7 @@ class AuthContainer:
         except KeyError:
             pass
 
-    #aliases
+    # aliases
     def add_credentials(self, hostname, username, password):
         """
         Adds credentials to the authentication container.
@@ -212,13 +195,9 @@ class AuthContainer:
         """
         return self.__manage_credentials(hostname, "", "", True)
 
-
-
     def get_hostnames(self):
         """This function returns hostnames"""
         return self.CREDENTIALS.keys()
-
-
 
     @staticmethod
     def cut_hostname(snippet):
@@ -232,16 +211,14 @@ class AuthContainer:
         parsed_uri = urlparse(snippet)
         host = '{uri.netloc}'.format(uri=parsed_uri)
         if host == "":
-            #non-URL/URI
+            # non-URL/URI
             host = snippet
         return host
-
-
 
     def get_credential(self, hostname):
         """
         This function returns credentials for a particular hostname.
-        
+
         :param hostname: hostname
         :type hostname: str
         """
@@ -253,14 +230,14 @@ class AuthContainer:
                 return (
                     self.CREDENTIALS[hostname]["username"],
                     crypto.decrypt(self.CREDENTIALS[hostname]["password"][2:].encode())
-                    )
+                )
             else:
-                #return plain information
+                # return plain information
                 self.LOGGER.debug("Plain login data")
                 return (
                     self.CREDENTIALS[hostname]["username"],
                     self.CREDENTIALS[hostname]["password"]
-                    )
+                )
         except InvalidToken:
             raise ContainerException("Invalid password specified!")
         except KeyError:

@@ -16,11 +16,23 @@ from .utilities import load_config
 
 @pytest.fixture(scope="session")
 def config():
+    """
+    Loads the configuration
+
+    :return: JSON object
+    """
     return load_config("libvirt_config.json")
 
 
 @pytest.fixture
 def client(config):
+    """
+    Instances a libvirt client
+
+    :param config: configuration
+    :type config: JSON object
+    :return: LibvirtClient object
+    """
     LibvirtClient = pytest.importorskip("katprep.clients.LibvirtClient")
 
     return LibvirtClient.LibvirtClient(
@@ -81,6 +93,9 @@ def test_revert_snapshot_fail(virtClient, nonexisting_vm, snapshot_name):
 
 
 def test_snapshot_handling(virtClient, config, snapshot_name):
+    """
+    Ensure that reverting/removing snapshots is possible
+    """
     host = config["valid_objects"]["vm"]
     virtClient.create_snapshot(host, snapshot_name, snapshot_name)
 

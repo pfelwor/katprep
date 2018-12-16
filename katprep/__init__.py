@@ -21,7 +21,6 @@ logging: Logger instance
 """
 
 
-
 def get_credentials(prefix, hostname=None, auth_container=None, auth_pass=None):
     """
     Retrieves credentials for a particular external system (e.g. Satellite).
@@ -46,36 +45,33 @@ def get_credentials(prefix, hostname=None, auth_container=None, auth_pass=None):
             s_creds = None
             s_creds = container.get_credential(hostname)
             if len(s_creds) == 2:
-                return (s_creds[0], s_creds[1])
+                return s_creds[0], s_creds[1]
             else:
                 raise TypeError("Invalid response")
-        except ContainerException as e:
-            LOGGER.error(e)
+        except ContainerException as err:
+            LOGGER.error(err)
             exit(1)
         except TypeError:
             LOGGER.warning(
-                "Login information for '{}' not found in container!".format(
-                    hostname
-                )
+                "Login information for '%s' not found in container!", hostname
             )
-            LOGGER.debug("Prompting for {} login credentials as we still" \
-                " haven't found what we're looking for".format(prefix))
+            LOGGER.debug("Prompting for %s login credentials as we still"
+                         " haven't found what we're looking for", prefix)
             s_username = raw_input(prefix + " Username: ")
             s_password = getpass.getpass(prefix + " Password: ")
-            return (s_username, s_password)
-    elif prefix.upper()+"_LOGIN" in os.environ and \
-        prefix.upper()+"_PASSWORD" in os.environ:
-        #shell variables
-        LOGGER.debug("Checking {} shell variables".format(prefix))
-        return (os.environ[prefix.upper()+"_LOGIN"], \
-            os.environ[prefix.upper()+"_PASSWORD"])
+            return s_username, s_password
+    elif prefix.upper() + "_LOGIN" in os.environ and \
+            prefix.upper() + "_PASSWORD" in os.environ:
+        # shell variables
+        LOGGER.debug("Checking %s shell variables", prefix)
+        return (os.environ[prefix.upper() + "_LOGIN"],
+                os.environ[prefix.upper() + "_PASSWORD"])
     else:
-        #prompt user
-        LOGGER.debug("Prompting for {} login credentials".format(prefix))
+        # prompt user
+        LOGGER.debug("Prompting for %s login credentials", prefix)
         s_username = raw_input(prefix + " Username: ")
         s_password = getpass.getpass(prefix + " Password: ")
-        return (s_username, s_password)
-
+        return s_username, s_password
 
 
 def is_writable(path):
@@ -85,11 +81,7 @@ def is_writable(path):
     :param path: path to check for write access
     :type path: str
     """
-    if os.access(os.path.dirname(path), os.W_OK):
-        return True
-    else:
-        return False
-
+    return bool(os.access(os.path.dirname(path), os.W_OK))
 
 
 def is_exe(file_path):
@@ -102,7 +94,6 @@ def is_exe(file_path):
     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 
 
-
 def which(command):
     """
     Checks whether a command name links to an existing binary (like whoami).
@@ -110,7 +101,7 @@ def which(command):
     :param command: command name to check
     :type command: str
     """
-    #stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+    # stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 
     fpath, fname = os.path.split(command)
     if fpath:
@@ -125,7 +116,6 @@ def which(command):
     return None
 
 
-
 def get_json(filename):
     """
     Reads a JSON file and returns the whole content as one-liner.
@@ -138,8 +128,7 @@ def get_json(filename):
             json_data = json_file.read().replace("\n", "")
         return json_data
     except IOError as err:
-        LOGGER.error("Unable to read file '{}': '{}'".format(filename, err))
-
+        LOGGER.error("Unable to read file '%s': '%s'", filename, err)
 
 
 def is_valid_report(filename):
@@ -150,23 +139,22 @@ def is_valid_report(filename):
     :type filename: str
     """
     if not os.path.exists(filename) or not os.access(filename, os.R_OK):
-        raise argparse.ArgumentTypeError("File '{}' non-existent or not" \
-            " readable".format(filename))
-    #check whether valid json
+        raise argparse.ArgumentTypeError("File '{}' non-existent or not"
+                                         " readable".format(filename))
+    # check whether valid json
     try:
         json_obj = json.loads(get_json(filename))
-        #check whether at least one host with a params dict is found
+        # check whether at least one host with a params dict is found
         if "params" not in json_obj.itervalues().next().keys():
-            raise argparse.ArgumentTypeError("File '{}' is not a valid JSON" \
-                " snapshot report.".format(filename))
+            raise argparse.ArgumentTypeError("File '{}' is not a valid JSON"
+                                             " snapshot report.".format(filename))
     except StopIteration as err:
-        raise argparse.ArgumentTypeError("File '{}' is not a valid JSON" \
-            " snapshot report.".format(filename))
+        raise argparse.ArgumentTypeError("File '{}' is not a valid JSON"
+                                         " snapshot report.".format(filename))
     except ValueError as err:
-        raise argparse.ArgumentTypeError("File '{}' is not a valid JSON" \
-            " document: '{}'".format(filename, err))
+        raise argparse.ArgumentTypeError("File '{}' is not a valid JSON"
+                                         " document: '{}'".format(filename, err))
     return filename
-
 
 
 def validate_filters(options, api_client):
@@ -180,23 +168,20 @@ def validate_filters(options, api_client):
     :type api_client: ForemanAPIClient
     """
     try:
-        if options.location and options.location.isdigit() == False:
+        if options.location and options.location.isdigit() is False:
             options.location = api_client.get_id_by_name(
                 options.location, "location")
-        if options.organization and options.organization.isdigit() == False:
+        if options.organization and options.organization.isdigit() is False:
             options.organization = api_client.get_id_by_name(
                 options.organization, "organization")
-        if options.hostgroup and options.hostgroup.isdigit() == False:
+        if options.hostgroup and options.hostgroup.isdigit() is False:
             options.hostgroup = api_client.get_id_by_name(
                 options.hostgroup, "hostgroup")
-        if options.environment and options.environment.isdigit() == False:
+        if options.environment and options.environment.isdigit() is False:
             options.environment = api_client.get_id_by_name(
                 options.environment, "environment")
-    except Exception as err:
-        print(err)
     except SessionException:
         pass
-
 
 
 def get_filter(options, api_object):
@@ -208,17 +193,18 @@ def get_filter(options, api_object):
     :param api_object: Foreman object type (e.g. host, environment)
     :type api_object: str
     """
+    filter_url = ""
     if options.location:
-        return "/locations/{}/{}s".format(options.location, api_object)
+        filter_url = "/locations/{}/{}s".format(options.location, api_object)
     elif options.organization:
-        return "/organizations/{}/{}s".format(options.organization, api_object)
+        filter_url = "/organizations/{}/{}s".format(options.organization, api_object)
     elif options.hostgroup:
-        return "/hostgroups/{}/{}s".format(options.hostgroup, api_object)
+        filter_url = "/hostgroups/{}/{}s".format(options.hostgroup, api_object)
     elif options.environment:
-        return "/environments/{}/{}s".format(options.environment, api_object)
+        filter_url = "/environments/{}/{}s".format(options.environment, api_object)
     else:
-        return "/{}s".format(api_object)
-
+        filter_url = "/{}s".format(api_object)
+    return filter_url
 
 
 def get_required_hosts_by_report(report, key):
@@ -232,16 +218,15 @@ def get_required_hosts_by_report(report, key):
     :param key: key that contains hostname (e.g. katprep_virt)
     :type key: str
     """
-    hosts=[]
+    hosts = []
     try:
         for host in report:
             if report[host]["params"][key] != "" and report[host]["params"][key] not in hosts:
                 hosts.append(report[host]["params"][key])
     except KeyError:
-            LOGGER.info("Key '{}' not found for host '{}'".format(key, host))
-            pass
+        LOGGER.info("Key '%s' not found for host '%s'", key, host)
+        pass
     return hosts
-
 
 
 def get_host_params_by_report(report, host):
@@ -257,5 +242,5 @@ def get_host_params_by_report(report, host):
         for entry in report:
             return report[entry]["params"]
     except KeyError:
-            LOGGER.info("Parameters not found for host '{}'".format(host))
-            pass
+        LOGGER.info("Parameters not found for host '%s'", host)
+        pass

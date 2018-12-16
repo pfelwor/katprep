@@ -16,11 +16,23 @@ from .utilities import load_config
 
 @pytest.fixture
 def config():
+    """
+    Loads the configuration
+
+    :return: JSON object
+    """
     return load_config("icinga2_config.json")
 
 
 @pytest.fixture
 def client(config):
+    """
+    Creates an Icinga2 API client
+
+    :param config: configuration
+    :type config: configuration object
+    :return: Icinga2APIClient object
+    """
     return Icinga2APIClient(
         logging.ERROR,
         config["config"]["hostname"],

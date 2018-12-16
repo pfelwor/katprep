@@ -18,11 +18,21 @@ from .utilities import load_config
 
 @pytest.fixture
 def config():
+    """
+    Loads the test configuration file.
+
+    :return: objects from JSON file
+    """
     return load_config("fman_config.json")
 
 
 @pytest.fixture
 def client(config):
+    """
+    Returns a Foreman API client based on configuration.
+
+    :return: Foreman API client object
+    """
     return ForemanAPIClient(
         logging.ERROR,
         config["config"]["hostname"],
@@ -34,6 +44,9 @@ def client(config):
 
 @pytest.fixture
 def bookmark_id(client):
+    """
+    Creates a demo bookmark.
+    """
     # create demo bookmark
     try:
         client.api_post(
