@@ -54,8 +54,6 @@ katprep_report
 ==============
 * fixed several bugs where report information were incorrect (`issue61`_)
 
-.. _issue61: https://github.com/stdevel/katprep/issues/61
-
 API integrations
 ================
 * All: implemented unit tests for API clients (`issue13`_)
