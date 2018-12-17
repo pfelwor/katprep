@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=not-callable
 """
-A script for creating maintenance reports including installed errata per system
-managed with Foreman/Katello or Red Hat Satellite 6.
+Creates maintenance reports including installed errata per system managed with Foreman/Katello or
+Red Hat Satellite 6
 """
 
 from __future__ import absolute_import
@@ -40,7 +40,9 @@ dic: New snapshot report
 
 
 def parse_options(args=None):
-    """Parses options and arguments."""
+    """
+    Parses options and arguments
+    """
     desc = '''%(prog)s is used for creating maintenance reports
     including errata per system managed with Foreman/Katello or Red Hat
     Satellite 6. The utility requires two snapshots: before and after
@@ -57,34 +59,44 @@ def parse_options(args=None):
 
     # GENERIC ARGUMENTS
     # -q / --quiet
-    gen_opts.add_argument("-q", "--quiet", action="store_true",
-                          dest="generic_quiet", default=False, help="don't print status messages "
-                                                                    "to stdout (default: no)")
+    gen_opts.add_argument(
+        "-q", "--quiet", action="store_true", dest="generic_quiet", default=False,
+        help="don't print status messages to stdout (default: no)"
+    )
     # -d / --debug
-    gen_opts.add_argument("-d", "--debug", dest="generic_debug", default=False,
-                          action="store_true", help="enable debugging outputs (default: no)")
+    gen_opts.add_argument(
+        "-d", "--debug", dest="generic_debug", default=False, action="store_true",
+        help="enable debugging outputs (default: no)"
+    )
     # -p / --output-path
-    gen_opts.add_argument("-p", "--output-path", dest="output_path",
-                          metavar="PATH", default="", action="store",
-                          help="defines the output path for reports (default: current directory)")
+    gen_opts.add_argument(
+        "-p", "--output-path", dest="output_path", metavar="PATH", default="", action="store",
+        help="defines the output path for reports (default: current directory)"
+    )
 
     # REPORT ARGUMENTS
     # -o / --output-type
-    rep_opts.add_argument("-o", "--output-type", dest="output_type", metavar="FILE", default="",
-                          help="defines the output file type for Pandoc, usually this is set "
-                               "automatically based on the template file extension (default: no)")
+    rep_opts.add_argument(
+        "-o", "--output-type", dest="output_type", metavar="FILE", default="",
+        help="defines the output file type for Pandoc, usually this is set automatically based "
+             "on the template file extension (default: no)"
+    )
     # -x / --preserve-yaml
-    rep_opts.add_argument("-x", "--preserve-yaml", dest="preserve_yaml", default=False,
-                          action="store_true",
-                          help="keeps the YAML metadata after creating the reports, important "
-                               "for debugging (default: no)")
+    rep_opts.add_argument(
+        "-x", "--preserve-yaml", dest="preserve_yaml", default=False, action="store_true",
+        help="keeps the YAML metadata after creating the reports, important for debugging "
+             "(default: no)"
+    )
     # -t / --template
-    rep_opts.add_argument("-t", "--template", dest="template_file", metavar="FILE", default="",
-                          action="store", help="defines a dedicated template file (default: "
-                                               "integrated HTML)")
+    rep_opts.add_argument(
+        "-t", "--template", dest="template_file", metavar="FILE", default="", action="store",
+        help="defines a dedicated template file (default: integrated HTML)"
+    )
     # snapshot reports
-    rep_opts.add_argument('reports', metavar='FILE', nargs=2,
-                          help='Two snapshot reports (before/after patching)', type=is_valid_report)
+    rep_opts.add_argument(
+        "reports", metavar='FILE', nargs=2, type=is_valid_report,
+        help='Two snapshot reports (before/after patching)'
+    )
 
     # parse options and arguments
     options = parser.parse_args()
@@ -93,8 +105,8 @@ def parse_options(args=None):
 
 def check_pandoc():
     """
-    Checks the Pandoc installation by ensuring that the ``pandoc`` binary is
-    available from the command line.
+    Checks the Pandoc installation by ensuring that the ``pandoc`` binary is available from
+    the command line
     """
     if not which("pandoc"):
         return False
@@ -185,7 +197,7 @@ def analyze_reports(options):
 
 def get_errata_by_host(report, hostname):
     """
-    Returns all errata by a particular host in a report.
+    Returns all errata by a particular host in a report
 
     :param report: JSON report content
     :type report: str
@@ -204,8 +216,8 @@ def get_errata_by_host(report, hostname):
 
 def create_delta(options):
     """
-    Creats delta YAML reports per system. This is done by comparing the two
-    snapshot reports passed as arguments.
+    Creates delta YAML reports per system. This is done by comparing the two snapshot reports
+    passed as arguments.
     """
     global REPORT_OLD
     now = datetime.datetime.now()
@@ -248,8 +260,8 @@ def create_delta(options):
 
 def create_reports(options):
     """
-    Creates patch reports per system. This is done by translating the
-    YAML reports created previously into the desired format using ``pandoc``.
+    Creates patch reports per system. This is done by translating the YAML reports created
+    previously into the desired format using ``pandoc``.
     """
     for host in REPORT_OLD:
         timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(
@@ -276,7 +288,9 @@ def create_reports(options):
 
 
 def main(options, args):
-    """Main function, starts the logic based on parameters."""
+    """
+    Starts the logic based on parameters
+    """
     # set template
     if options.template_file == "":
         options.template_file = "./templates/template.html"
@@ -324,7 +338,7 @@ def main(options, args):
 
 def cli():
     """
-    This functions initializes the CLI interface
+    Initializes the CLI interface
     """
     global LOG_LEVEL
     (options, args) = parse_options()

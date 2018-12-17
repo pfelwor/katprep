@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Class for sending some very basic commands to Icinga 2.x
-monitoring systems.
+Class for sending some very basic commands to Icinga 2.x monitoring systems
 """
 
 import logging
@@ -15,7 +14,7 @@ from katprep.clients import SessionException, EmptySetException
 
 class Icinga2APIClient:
     """
-    Class for communicating with the Icinga2 API
+    Class for sending some very basic commands to Icinga 2.x monitoring systems
 
 .. class:: Icinga2APIClient
     """
@@ -40,11 +39,12 @@ class Icinga2APIClient:
     bool: Setting whether to check SSL certificate
     """
 
-    def __init__(self, log_level, url,
-                 username="", password="", verify_ssl=False):
+    def __init__(
+            self, log_level, url, username="", password="", verify_ssl=False
+    ):
         """
-        Constructor, creating the class. It requires specifying a
-        URL, an username and password to access the API.
+        Constructor, creating the class. It requires specifying a URL, an username and password to
+        access the API.
 
         :param log_level: log level
         :type log_level: logging
@@ -55,7 +55,6 @@ class Icinga2APIClient:
         :param password: corresponding password
         :type password: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
 
         # set connection data
@@ -73,7 +72,7 @@ class Icinga2APIClient:
 
     def __connect(self):
         """
-        This function establishes a connection to the Icinga2 API.
+        Establishes a connection to the Icinga2 API
         """
         self.SESSION = requests.Session()
         if self.USERNAME != "":
@@ -81,9 +80,9 @@ class Icinga2APIClient:
 
     def __api_request(self, method, sub_url, payload=""):
         """
-        Sends a HTTP request to the Nagios/Icinga API. This function requires
-        a valid HTTP method and a sub-URL (such as /cgi-bin/status.cgi).
-        Optionally, you can also specify payload (for POST).
+        Sends a HTTP request to the Nagios/Icinga API. This function requires a valid HTTP method
+        and a sub-URL (such as /cgi-bin/status.cgi). Optionally, you can also specify payload
+        (for POST).
         There are also alias functions available.
 
         :param method: HTTP request method (GET, POST)
@@ -96,7 +95,6 @@ class Icinga2APIClient:
         # send request to API
         try:
             if method.lower() not in ["get", "post"]:
-                # going home
                 raise SessionException("Illegal method '{}' specified".format(method))
             self.LOGGER.debug(
                 "%s request to %s (payload: %s)",
@@ -104,14 +102,16 @@ class Icinga2APIClient:
             )
 
             # execute request
+            self.LOGGER.debug(
+                "%s request to %s%s (payload: %s)", method.upper(), self.URL,
+                sub_url, str(payload)
+            )
             if method.lower() == "post":
-                # POST
                 result = self.SESSION.post(
                     "{}{}".format(self.URL, sub_url),
                     headers=self.HEADERS, data=payload, verify=self.VERIFY_SSL
                 )
             else:
-                # GET
                 result = self.SESSION.get(
                     "{}{}".format(self.URL, sub_url),
                     headers=self.HEADERS, verify=self.VERIFY_SSL
@@ -135,8 +135,8 @@ class Icinga2APIClient:
     # Aliases
     def __api_get(self, sub_url):
         """
-        Sends a HTTP GET request to the Nagios/Icinga API. This function
-        requires a sub-URL (such as /cgi-bin/status.cgi).
+        Sends a HTTP GET request to the Nagios/Icinga API. This function requires a sub-URL
+        (such as /cgi-bin/status.cgi).
 
         :param sub_url: relative path (e.g. /cgi-bin/status.cgi)
         :type sub_url: str
@@ -145,8 +145,8 @@ class Icinga2APIClient:
 
     def __api_post(self, sub_url, payload):
         """
-        Sends a HTTP POST request to the Nagios/Icinga API. This function
-        requires a sub-URL (such as /cgi-bin/status.cgi).
+        Sends a HTTP POST request to the Nagios/Icinga API. This function requires a sub-URL
+        (such as /cgi-bin/status.cgi).
 
         :param sub_url: relative path (e.g. /cgi-bin/status.cgi)
         :type sub_url: str
@@ -157,9 +157,8 @@ class Icinga2APIClient:
 
     def __calculate_time(self, hours):
         """
-        Calculates the time range for POST requests in the format the
-        Icinga 2.x API requires. For this, the current time/date
-        is chosen and the specified amount of hours is added.
+        Calculates the time range for POST requests in the format the Icinga 2.x API requires.
+        For this, the current time/date is chosen and the specified amount of hours is added.
 
         :param hours: Amount of hours for the time range
         :type hours: int
@@ -172,9 +171,8 @@ class Icinga2APIClient:
             self, object_name, object_type, hours, comment, remove_downtime
     ):
         """
-        Adds or removes scheduled downtime for a host or hostgroup.
-        For this, a object name and type are required.
-        You can also specify a comment and downtime period.
+        Adds or removes scheduled downtime for a host or hostgroup. For this, a object name and
+        type are required. You can also specify a comment and downtime period.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -240,18 +238,18 @@ class Icinga2APIClient:
             result = self.__api_post("/actions/schedule-downtime", json.dumps(payload))
         # return result
         result_obj = json.loads(result.text)
-        if result_obj["results"]:
+        if not result_obj["results"]:
             raise EmptySetException("Host/service not found")
         else:
             return result
 
-    def schedule_downtime(self, object_name, object_type, hours=8,
-                          comment="Downtime managed by katprep"):
+    def schedule_downtime(
+            self, object_name, object_type, hours=8, comment="Downtime managed by katprep"
+    ):
         """
-        Adds scheduled downtime for a host or hostgroup.
-        For this, a object name and type are required.
-        Optionally, you can specify a customized comment and downtime
-        period (the default is 8 hours).
+        Adds scheduled downtime for a host or hostgroup. For this, a object name and type are
+        required. Optionally, you can specify a customized comment and downtime period
+        (the default is 8 hours).
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -267,21 +265,21 @@ class Icinga2APIClient:
 
     def remove_downtime(self, object_name, object_type):
         """
-        Removes scheduled downtime for a host or hostgroup
-        For this, a object name is required.
+        Removes scheduled downtime for a host or hostgroup For this, a object name is required.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
         :param object_type: host or hostgroup
         :type object_type: str
         """
-        return self.__manage_downtime(object_name, object_type, 8,
-                                      "Downtime managed by katprep", remove_downtime=True)
+        return self.__manage_downtime(
+            object_name, object_type, 8, "Downtime managed by katprep", remove_downtime=True
+        )
 
     def has_downtime(self, object_name, object_type="host"):
         """
-        Returns whether a particular object (host, hostgroup) is currently in
-        scheduled downtime. This required specifying an object name and type.
+        Returns whether a particular object (host, hostgroup) is currently in scheduled downtime.
+        This required specifying an object name and type.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -307,7 +305,7 @@ class Icinga2APIClient:
 
     def get_services(self, object_name, only_failed=True):
         """
-        Returns all or failed services for a particular host.
+        Returns all or failed services for a particular host
 
         :param object_name:
         :type object_name: str
@@ -327,11 +325,11 @@ class Icinga2APIClient:
             self.LOGGER.debug(
                 "Found service '%s' with state '%s'", service, state
             )
+            # append service if ok or state not ok
             if only_failed is False or float(state) != 0.0:
-                # append service if ok or state not ok
                 this_service = {"name": service, "state": state}
                 services.append(this_service)
-        if services:
+        if not services:
             # empty set
             raise EmptySetException(
                 "No results for host '%s'".format(object_name)
@@ -341,7 +339,7 @@ class Icinga2APIClient:
 
     def get_hosts(self, ipv6_only=False):
         """
-        Returns hosts by their name and IP.
+        Returns hosts by their name and IP
 
         :param ipv6_only: use IPv6 addresses only
         :type ipv6_only: bool
@@ -351,7 +349,7 @@ class Icinga2APIClient:
         data = json.loads(result.text)
         hosts = []
         for result in data["results"]:
-            # get all the host information
+            # translate host information
             host = result["attrs"]["display_name"]
             if ipv6_only:
                 ip = result["attrs"]["address6"]

@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Class for sending some very basic commands to Nagios/Icinga 1.x legacy
-monitoring systems.
+Class for sending some very basic commands to Nagios/Icinga 1.x legacy monitoring systems
 """
 
 import time
 import logging
 from datetime import datetime, timedelta
 import re
-import requests
 import os
+import requests
 from requests.auth import HTTPBasicAuth
 from lxml import html
 from katprep.clients import SessionException, UnsupportedRequestException
@@ -18,6 +17,8 @@ from katprep.clients import SessionException, UnsupportedRequestException
 
 class NagiosCGIClient(object):
     """
+    Class for sending some very basic commands to Nagios/Icinga 1.x legacy monitoring systems
+
 .. class:: NagiosCGIClient
     """
     LOGGER = logging.getLogger('NagiosCGIClient')
@@ -47,9 +48,8 @@ class NagiosCGIClient(object):
 
     def __init__(self, log_level, url, username, password, verify=True):
         """
-        Constructor, creating the class. It requires specifying a
-        URL. Optionally you can specify a username and password to access
-        the API using HTTP Basic authentication.
+        Constructor, creating the class. It requires specifying a URL. Optionally you can specify
+        a username and password to access the API using HTTP Basic authentication.
 
         :param log_level: log level
         :type log_level: logging
@@ -60,7 +60,6 @@ class NagiosCGIClient(object):
         :param password: corresponding password
         :type password: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
         if url[len(url) - 1:] != "/":
             # add trailing slash
@@ -79,8 +78,8 @@ class NagiosCGIClient(object):
 
     def set_nagios(self, flag):
         """
-        This function sets a flag for Nagios systems as there are CGI
-        differences between Nagios and Icinga 1.x.
+        This function sets a flag for Nagios systems as there are CGI differences between Nagios
+        and Icinga 1.x
 
         :param flag: boolean whether Nagios system
         :type flag: bool
@@ -89,7 +88,7 @@ class NagiosCGIClient(object):
 
     def connect(self):
         """
-        This function establishes a connection to Nagios/Icinga.
+        This function establishes a connection to Nagios/Icinga
         """
         self.session = requests.Session()
         if self.username != "":
@@ -97,10 +96,9 @@ class NagiosCGIClient(object):
 
     def __api_request(self, method, sub_url, payload=""):
         """
-        Sends a HTTP request to the Nagios/Icinga API. This function requires
-        a valid HTTP method and a sub-URL (such as /cgi-bin/status.cgi).
-        Optionally, you can also specify payload (for POST).
-        There are also alias functions available.
+        Sends a HTTP request to the Nagios/Icinga API. This function requires a valid HTTP method
+        and a sub-URL (such as /cgi-bin/status.cgi). Optionally, you can also specify payload
+        (for POST). There are also alias functions available.
 
         :param method: HTTP request method (GET, POST)
         :type method: str
@@ -118,23 +116,20 @@ class NagiosCGIClient(object):
         )
         try:
             if method.lower() not in ["get", "post"]:
-                # going home
                 raise SessionException("Illegal method '{}' specified".format(method))
 
             # execute request
             if method.lower() == "post":
-                # POST
                 result = self.session.post(
                     "{}{}".format(self.url, sub_url),
                     headers=self.HEADERS, data=payload, verify=self.verify
                 )
             else:
-                # GET
                 result = self.session.get(
                     "{}{}".format(self.url, sub_url),
                     headers=self.HEADERS, verify=self.verify
                 )
-            # this really breaks shit
+            # this really floods your screen
             # self.LOGGER.debug("HTML output: %s", result.text)
             if "error" in result.text.lower():
                 tree = html.fromstring(result.text)
@@ -151,7 +146,6 @@ class NagiosCGIClient(object):
                     )
                 )
             else:
-                # return result
                 if method.lower() == "get":
                     return result.text
                 else:
@@ -164,8 +158,8 @@ class NagiosCGIClient(object):
     # Aliases
     def __api_get(self, sub_url):
         """
-        Sends a HTTP GET request to the Nagios/Icinga API. This function
-        requires a sub-URL (such as /cgi-bin/status.cgi).
+        Sends a HTTP GET request to the Nagios/Icinga API. This function requires a sub-URL
+        (such as /cgi-bin/status.cgi).
 
         :param sub_url: relative path (e.g. /cgi-bin/status.cgi)
         :type sub_url: str
@@ -174,8 +168,8 @@ class NagiosCGIClient(object):
 
     def __api_post(self, sub_url, payload):
         """
-        Sends a HTTP POST request to the Nagios/Icinga API. This function
-        requires a sub-URL (such as /cgi-bin/status.cgi).
+        Sends a HTTP POST request to the Nagios/Icinga API. This function requires a sub-URL
+        (such as /cgi-bin/status.cgi).
 
         :param sub_url: relative path (e.g. /cgi-bin/status.cgi)
         :type sub_url: str
@@ -187,9 +181,9 @@ class NagiosCGIClient(object):
     @staticmethod
     def __calculate_time(hours):
         """
-        Calculates the time range for POST requests in the format the
-        Nagios/Icinga 1.x API requires. For this, the current time/date
-        is chosen and the specified amount of hours is added.
+        Calculates the time range for POST requests in the format the Nagios/Icinga 1.x API
+        requires. For this, the current time/date is chosen and the specified amount of
+        hours is added.
 
         :param hours: Amount of hours for the time range
         :type hours: int
@@ -204,9 +198,8 @@ class NagiosCGIClient(object):
             self, object_name, object_type, hours, comment, remove_downtime
     ):
         """
-        Adds or removes scheduled downtime for a host or hostgroup.
-        For this, a object name and type are required.
-        You can also specify a comment and downtime period.
+        Adds or removes scheduled downtime for a host or hostgroup. For this, a object name and
+        type are required. You can also specify a comment and downtime period.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -219,7 +212,6 @@ class NagiosCGIClient(object):
         :param remove_downtime: Removes a previously scheduled downtime
         :type remove_downtime: bool
         """
-        # calculate timerange
         (current_time, end_time) = self.__calculate_time(hours)
 
         # set-up payload
@@ -265,19 +257,19 @@ class NagiosCGIClient(object):
                     payload[1] = payload[0].copy()
                     payload[1]['cmd_typ'] = '55'
 
-        # send POST
+        # send request
         result = None
         for req in payload:
             result = self.__api_post("/cgi-bin/cmd.cgi", payload[req])
         return result
 
-    def schedule_downtime(self, object_name, object_type, hours=8,
-                          comment="Downtime managed by katprep"):
+    def schedule_downtime(
+            self, object_name, object_type, hours=8, comment="Downtime managed by katprep"
+    ):
         """
-        Adds scheduled downtime for a host or hostgroup.
-        For this, a object name and type are required.
-        Optionally, you can specify a customized comment and downtime
-        period (the default is 8 hours).
+        Adds scheduled downtime for a host or hostgroup. For this, a object name and type are
+        required. Optionally, you can specify a customized comment and downtime period
+        (the default is 8 hours).
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -288,15 +280,14 @@ class NagiosCGIClient(object):
         :param comment: Downtime comment
         :type comment: str
         """
-        return self.__manage_downtime(object_name, object_type, hours,
-                                      comment, remove_downtime=False)
+        return self.__manage_downtime(
+            object_name, object_type, hours, comment, remove_downtime=False
+        )
 
     def remove_downtime(self, object_name, object_type="host"):
         """
-        Removes scheduled downtime for a host.
-        For this, a object name is required.
-        At this point, it is not possible to remove downtime for a
-        whole hostgroup.
+        Removes scheduled downtime for a host. For this, a object name is required. At this point,
+        it is not possible to remove downtime for a whole hostgroup.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
@@ -309,13 +300,12 @@ class NagiosCGIClient(object):
 
     def has_downtime(self, object_name):
         """
-        Returns whether a particular object (host, hostgroup) is currently in
-        scheduled downtime. This required specifying an object name and type.
+        Returns whether a particular object (host, hostgroup) is currently in scheduled downtime.
+        This required specifying an object name and type.
 
         :param object_name: Hostname or hostgroup name
         :type object_name: str
         """
-        # retrieve host information
         result = self.__api_get(
             "/cgi-bin/status.cgi?host={}".format(object_name)
         )
@@ -350,8 +340,8 @@ class NagiosCGIClient(object):
     @staticmethod
     def __is_blacklisted(text):
         """
-        Returns whether a text received when parsing service information is
-        blacklisted. Used internally - isn't that funny outside get_services().
+        Returns whether a text received when parsing service information is blacklisted.
+        Used internally - isn't that funny outside get_services().
 
         :param text: text
         :type text: str
@@ -375,7 +365,6 @@ class NagiosCGIClient(object):
         if text not in blacklist:
             # compile _all_ the regexps!
             for item in blacklist_regex:
-                # result = __regexp_matches(text, item)
                 result = re.match(item, text)
                 if result:
                     return True
@@ -401,7 +390,7 @@ class NagiosCGIClient(object):
 
     def get_services(self, object_name, only_failed=True):
         """
-        Returns all or failed services for a particular host.
+        Returns all or failed services for a particular host
 
         :param object_name:
         :type object_name: str
@@ -458,7 +447,7 @@ class NagiosCGIClient(object):
 
     def get_hosts(self, ipv6_only=False):
         """
-        Returns hosts by their name and IP.
+        Returns hosts by their name and IP
 
         :param ipv6_only: use IPv6 addresses only
         :type ipv6_only: bool
@@ -509,7 +498,7 @@ class NagiosCGIClient(object):
     def dummy_call(self):
         """
         This function is used for checking whether authorization succeeded.
-        It simply retrieves status.cgi
+        It simply retrieves status.cgi.
         """
         # set-up URL
         url = "/cgi-bin/status.cgi?host=all&style=hostdetail&limit=0&start=1"

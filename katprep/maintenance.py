@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=not-callable
 """
-A script which prepares, executes and controls maintenance tasks on systems
-managed with Foreman/Katello or Red Hat Satellite 6.
+Prepares, executes and controls maintenance tasks on systems managed with Foreman/Katello or
+Red Hat Satellite 6
 """
 
 from __future__ import absolute_import, print_function
@@ -63,7 +63,7 @@ str: Date prefix for snapshots and downtimes
 
 def is_blacklisted(host, blacklist):
     """
-    This function checks whether a host is matched by an exclude pattern
+    Checks whether a host is matched by an exclude pattern
     """
     for entry in blacklist:
         if entry.replace("*", "").replace("%", "") in host:
@@ -73,7 +73,7 @@ def is_blacklisted(host, blacklist):
 
 def get_host_param_from_report(report, host, param):
     """
-    This function retrieves a host parameter value from a report.
+    Retrieves a host parameter value from a report
 
     :param report: snapshot report data
     :type report: dict
@@ -89,8 +89,8 @@ def get_host_param_from_report(report, host, param):
 
 def manage_host_preparation(options, host, cleanup=False):
     """
-    This function prepares or cleans up maintenance tasks for a particular
-    host. This includes creating/removing snapshots and scheduled downtimes.
+    Prepares/cleans up maintenance tasks for a particular host.
+    This includes creating/removing snapshots and scheduled downtimes.
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -207,9 +207,8 @@ def manage_host_preparation(options, host, cleanup=False):
 
 def set_verification_value(options, host, setting, value):
     """
-    This function stores verification data in a snapshot report. This is done
-    by altering the host information dictionary and storing the changes in the
-    JSON catalog.
+    Stores verification data in a snapshot report. This is done by altering the host information
+    dictionary and storing the changes in the JSON catalog.
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -239,8 +238,7 @@ def set_verification_value(options, host, setting, value):
 
 def prepare(options, args):
     """
-    This function prepares maintenance tasks, which might include creating
-    snapshots and scheduling downtime.
+    Prepares maintenance tasks, which might include creating snapshots and scheduling downtime
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -265,8 +263,7 @@ def prepare(options, args):
 
 def execute(options, args):
     """
-    This function executes maintenance tasks, which might include applying
-    errata.
+    Executes maintenance tasks, which might include applying errata
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -336,9 +333,8 @@ def execute(options, args):
 
 def revert(options, args):
     """
-    This function reverts maintenance tasks.
-    As the Foreman APIs lacks possibilities, only VM snapshots are restored
-    currently.
+    Reverts maintenance tasks; as the Foreman APIs lacks possibilities,
+    only VM snapshots are restored currently
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -385,9 +381,9 @@ def revert(options, args):
 
 def verify(options, args):
     """
-    This function verifies maintenance tasks (such as creating snapshots and
-    installing errata) and stores status information in a verification log.
-    These information are included into host reports by katprep_report.
+    Verifies maintenance tasks (such as creating snapshots and installing errata) and stores
+    status information in a verification log. These information are included into host reports
+    by katprep_report.
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -482,8 +478,7 @@ def verify(options, args):
 
 def status(options, args):
     """
-    This function shows current Foreman/Katello software maintenance task
-    status.
+    This function shows current Foreman/Katello software maintenance task status
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -547,8 +542,8 @@ def status(options, args):
 
 def cleanup(options, args):
     """
-    This function cleans things up after executing maintenance tasks. This
-    might include removing snapshots and scheduled downtimes.
+    This function cleans things up after executing maintenance tasks. This might include removing
+    snapshots and scheduled downtimes.
 
     :param options: runtime arguments
     :type options: argparse arguments
@@ -569,8 +564,7 @@ def cleanup(options, args):
 
 def load_configuration(config_file, options):
     """
-    This function imports parameters and values from a YAML configuration
-    file.
+    This function imports parameters and values from a YAML configuration file
 
     :param config_file: Path to configuration file
     :type config_file: str
@@ -589,7 +583,9 @@ def load_configuration(config_file, options):
 
 
 def parse_options(args=None):
-    """Parses options and arguments."""
+    """
+    Parses options and arguments
+    """
     desc = '''%(prog)s is used for preparing, executing and
     controlling maintenance tasks on systems managed with Foreman/Katello
     or Red Hat Satellite 6.
@@ -614,122 +610,147 @@ def parse_options(args=None):
 
     # GENERIC ARGUMENTS
     # -q / --quiet
-    gen_opts.add_argument("-q", "--quiet", action="store_true",
-                          dest="generic_quiet",
-                          default=False, help="don't print status messages "
-                          "to stdout (default: no)")
+    gen_opts.add_argument(
+        "-q", "--quiet", action="store_true", dest="generic_quiet",
+        default=False, help="don't print status messages to stdout (default: no)"
+    )
     # -d / --debug
-    gen_opts.add_argument("-d", "--debug", dest="generic_debug",
-                          default=False, action="store_true",
-                          help="enable debugging outputs (default: no)")
+    gen_opts.add_argument(
+        "-d", "--debug", dest="generic_debug", default=False, action="store_true",
+        help="enable debugging outputs (default: no)"
+    )
     # -n / --dry-run
-    gen_opts.add_argument("-n", "--dry-run", dest="generic_dry_run",
-                          default=False, action="store_true",
-                          help="only simulate what would be done (default: no)")
+    gen_opts.add_argument(
+        "-n", "--dry-run", dest="generic_dry_run", default=False, action="store_true",
+        help="only simulate what would be done (default: no)"
+    )
     # -C / --auth-container
-    gen_opts.add_argument("-C", "--auth-container", default="",
-                          dest="generic_auth_container", action="store", metavar="FILE",
-                          help="defines an authentication container file (default: no)")
+    gen_opts.add_argument(
+        "-C", "--auth-container", default="", dest="generic_auth_container", action="store",
+        metavar="FILE", help="defines an authentication container file (default: no)"
+    )
     # -P / --auth-password
-    gen_opts.add_argument("-P", "--auth-password", default="empty",
-                          dest="auth_password", action="store", metavar="PASSWORD",
-                          help="defines the authentication container password in case you don't "
-                               "want to enter it manually (useful for scripted automation)")
+    gen_opts.add_argument(
+        "-P", "--auth-password", default="empty", dest="auth_password", action="store",
+        metavar="PASSWORD", help="defines the authentication container password in case you don't "
+                                 "want to enter it manually (useful for scripted automation)"
+    )
     # -c / --config
-    gen_opts.add_argument("-c", "--config", dest="config", default="",
-                          action="store", metavar="FILE",
-                          help="use a configuration rather than 1337 parameters (default: no)")
+    gen_opts.add_argument(
+        "-c", "--config", dest="config", default="", action="store", metavar="FILE",
+        help="use a configuration rather than 1337 parameters (default: no)"
+    )
     # snapshot reports
-    gen_opts.add_argument('report', metavar='FILE', nargs=1,
-                          help='A snapshot report', type=is_valid_report)
+    gen_opts.add_argument(
+        'report', metavar='FILE', nargs=1, help='A snapshot report', type=is_valid_report
+    )
     # --insecure
-    gen_opts.add_argument("--insecure", dest="ssl_verify", default=True,
-                          action="store_false", help="Disables SSL verification (default: no)")
+    gen_opts.add_argument(
+        "--insecure", dest="ssl_verify", default=True, action="store_false",
+        help="Disables SSL verification (default: no)"
+    )
 
     # FOREMAN ARGUMENTS
     # -s / --foreman-server
-    fman_opts.add_argument("-s", "--foreman-server",
-                           dest="foreman_server", metavar="SERVER", default="localhost",
-                           help="defines the Foreman server to use (default: localhost)")
+    fman_opts.add_argument(
+        "-s", "--foreman-server", dest="foreman_server", metavar="SERVER", default="localhost",
+        help="defines the Foreman server to use (default: localhost)"
+    )
     # -r / --reboot-systems
-    fman_opts.add_argument("-r", "--reboot-systems", dest="foreman_reboot",
-                           default=False, action="store_true",
-                           help="always reboot systems after successful errata installation "
-                                "(default: no, only if reboot_suggested set)")
+    fman_opts.add_argument(
+        "-r", "--reboot-systems", dest="foreman_reboot", default=False, action="store_true",
+        help="always reboot systems after successful errata installation (default: no, only "
+             "if reboot_suggested set)"
+    )
     # suppress reboot
-    fman_opts.add_argument("-R", "--no-reboot", dest="foreman_no_reboot",
-                           default=True, action="store_false",
-                           help="suppresses rebooting the system under any circumstances "
-                           "(default: no)")
+    fman_opts.add_argument(
+        "-R", "--no-reboot", dest="foreman_no_reboot", default=True, action="store_false",
+        help="suppresses rebooting the system under any circumstances (default: no)"
+    )
 
     # VIRTUALIZATION ARGUMENTS
     # --virt-uri
     # TODO: validate URI
-    virt_opts.add_argument("--virt-uri", dest="virt_uri",
-                           metavar="URI", default="",
-                           help="defines a libvirt URI to use")
+    virt_opts.add_argument(
+        "--virt-uri", dest="virt_uri", metavar="URI", default="",
+        help="defines a libvirt URI to use"
+    )
     # -k / --skip-snapshot
-    virt_opts.add_argument("-k", "--skip-snapshot", dest="virt_skip_snapshot",
-                           default=False, action="store_true",
-                           help="skips creating snapshots (default: no)")
+    virt_opts.add_argument(
+        "-k", "--skip-snapshot", dest="virt_skip_snapshot", default=False, action="store_true",
+        help="skips creating snapshots (default: no)"
+    )
 
     # MONITORING ARGUMENTS
     # --mon-url
-    mon_opts.add_argument("--mon-url", dest="mon_url",
-                          metavar="URL", default="", help="defines a monitoring URL to use")
+    mon_opts.add_argument(
+        "--mon-url", dest="mon_url", metavar="URL", default="",
+        help="defines a monitoring URL to use"
+    )
     # --mon-type
-    mon_opts.add_argument("--mon-type", dest="mon_type",
-                          metavar="TYPE", type=str, choices="nagios|icinga", default="icinga",
-                          help="defines the monitoring system type: nagios (Nagios/Icinga 1.x) or"
-                               " icinga (Icinga 2.x). (default: icinga)")
+    mon_opts.add_argument(
+        "--mon-type", dest="mon_type", metavar="TYPE", type=str, choices="nagios|icinga",
+        default="icinga", help="defines the monitoring system type: nagios (Nagios/Icinga 1.x) "
+                               "or  icinga (Icinga 2.x). (default: icinga)"
+    )
     # -K / --skip-downtime
-    mon_opts.add_argument("-K", "--skip-downtime", dest="mon_skip_downtime",
-                          action="store_true", default=False,
-                          help="skips scheduling downtimes (default: no)")
+    mon_opts.add_argument(
+        "-K", "--skip-downtime", dest="mon_skip_downtime", action="store_true", default=False,
+        help="skips scheduling downtimes (default: no)"
+    )
     # -S / --mon-suggested
-    mon_opts.add_argument("-S", "--mon-suggested", dest="mon_suggested",
-                          action="store_true", default=False, help="only schedules downtime if "
-                                                                   "suggested (default: no)")
+    mon_opts.add_argument(
+        "-S", "--mon-suggested", dest="mon_suggested", action="store_true", default=False,
+        help="only schedules downtime if suggested (default: no)"
+    )
     # -t / --mon-downtime
-    mon_opts.add_argument("-t", "--mon-downtime", dest="mon_downtime",
-                          metavar="HOURS", action="store", type=int, default=8,
-                          help="downtime period (default: 8 hours)")
+    mon_opts.add_argument(
+        "-t", "--mon-downtime", dest="mon_downtime", metavar="HOURS", action="store", type=int,
+        default=8, help="downtime period (default: 8 hours)"
+    )
 
     # FILTER ARGUMENTS
     # -l / --location
-    filter_opts_excl.add_argument("-l", "--location", action="store",
-                                  default="", dest="filter_location", metavar="NAME",
-                                  help="filters by a particular location (default: no)")
+    filter_opts_excl.add_argument(
+        "-l", "--location", action="store", default="", dest="filter_location", metavar="NAME",
+        help="filters by a particular location (default: no)"
+    )
     # -o / --organization
-    filter_opts_excl.add_argument("-o", "--organization", action="store",
-                                  default="", dest="filter_organization", metavar="NAME",
-                                  help="filters by an particular organization (default: no)")
+    filter_opts_excl.add_argument(
+        "-o", "--organization", action="store", default="", dest="filter_organization",
+        metavar="NAME", help="filters by an particular organization (default: no)"
+    )
     # -e / --environment
-    filter_opts_excl.add_argument("-e", "--environment", action="store",
-                                  default="", dest="filter_environment", metavar="NAME",
-                                  help="filters by an particular environment (default: no)")
+    filter_opts_excl.add_argument(
+        "-e", "--environment", action="store", default="", dest="filter_environment",
+        metavar="NAME", help="filters by an particular environment (default: no)"
+    )
     # -E / --exclude
-    fman_opts.add_argument("-E", "--exclude", action="append", default=[],
-                           type=str, dest="filter_exclude", metavar="NAME",
-                           help="excludes particular hosts (default: no)")
+    fman_opts.add_argument(
+        "-E", "--exclude", action="append", default=[], type=str, dest="filter_exclude",
+        metavar="NAME", help="excludes particular hosts (default: no)"
+    )
     # -I / --include-only
-    fman_opts.add_argument("-I", "--include-only", action="append", default=[],
-                           type=str, dest="filter_include", metavar="NAME",
-                           help="only includes particular hosts (default: no)")
+    fman_opts.add_argument(
+        "-I", "--include-only", action="append", default=[], type=str, dest="filter_include",
+        metavar="NAME", help="only includes particular hosts (default: no)"
+    )
 
     # COMMANDS
-    subparsers = parser.add_subparsers(title='commands',
-                                       description='controlling maintenance stages',
-                                       help='Additional help')
+    subparsers = parser.add_subparsers(
+        title='commands', description='controlling maintenance stages', help='Additional help'
+    )
     cmd_prepare = subparsers.add_parser("prepare", help="Preparing maintenance")
     cmd_prepare.set_defaults(func=prepare)
     cmd_execute = subparsers.add_parser("execute", help="Installing errata")
     cmd_execute.set_defaults(func=execute)
-    cmd_execute.add_argument("-p", "--include-packages", action="store_true",
-                             default=False, dest="upgrade_packages",
-                             help="installs available package upgrades (default: no)")
-    cmd_status = subparsers.add_parser("status", help="Display software "
-                                                      "maintenance progress")
+    cmd_execute.add_argument(
+        "-p", "--include-packages", action="store_true", default=False, dest="upgrade_packages",
+        help="installs available package upgrades (default: no)"
+    )
+    cmd_status = subparsers.add_parser(
+        "status", help="Display software maintenance progress"
+    )
     cmd_status.set_defaults(func=status)
     cmd_revert = subparsers.add_parser("revert", help="Reverting changes")
     cmd_revert.set_defaults(func=revert)
@@ -756,8 +777,8 @@ def parse_options(args=None):
 
 def set_filter(options, report):
     """
-    This function filters a report's hosts by organization, location
-    or environment. Also, it evaluates exclude filters.
+    Filters a report's hosts by organization, location or environment.
+    Also, it evaluates exclude filters.
 
     :param options: argparse options dictionary containing parameters
     :type options: argparse options dict
@@ -795,7 +816,9 @@ def set_filter(options, report):
 
 
 def main(options, args):
-    """Main function, starts the logic based on parameters."""
+    """
+    Starts the logic based on parameters
+    """
     global REPORT, REPORT_PREFIX, SAT_CLIENT
     global VIRT_CLIENTS, MON_CLIENTS
 
@@ -879,7 +902,7 @@ def main(options, args):
 
 def cli():
     """
-    This functions initializes the CLI interface
+    Initializes the CLI interface
     """
 
     global LOG_LEVEL

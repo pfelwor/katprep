@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Some shared functions.
+Some shared katprep functions
 """
 
 import socket
@@ -31,7 +31,7 @@ def is_ipv4(address):
 
 def is_ipv6(address):
     """
-    Returns whether the supplied address is a valid IPv6 address.
+    Returns whether the supplied address is a valid IPv6 address
 
     :param address: IP address
     :type address: str

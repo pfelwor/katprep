@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This file contains the ForemanAPIClient class
+Class for communicating with the Foreman API
 """
 
 import logging
@@ -12,7 +12,7 @@ from katprep.clients import SessionException, InvalidCredentialsException, \
     APILevelNotSupportedException
 
 
-class ForemanAPIClient:
+class ForemanAPIClient(object):
     """
     Class for communicating with the Foreman API
 
@@ -47,12 +47,12 @@ class ForemanAPIClient:
     bool: Boolean whether force SSL verification
     """
 
-    def __init__(self, log_level, hostname,
-                 username, password, verify=True, prefix=""):
+    def __init__(
+            self, log_level, hostname, username, password, verify=True, prefix=""
+    ):
         """
-        Constructor, creating the class. It requires specifying a
-        hostname, username and password to access the API. After
-        initialization, a connected is established.
+        Constructor, creating the class. It requires specifying a hostname, username and password
+        to access the API. After initialization, a connected is established.
 
         :param log_level: log level
         :type log_level: logging
@@ -67,7 +67,6 @@ class ForemanAPIClient:
         :param prefix: API prefix (e.g. /katello)
         :type prefix: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
         # disable SSL warning outputs
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -84,7 +83,7 @@ class ForemanAPIClient:
 
     def __connect(self):
         """
-        This function establishes a connection to Foreman.
+        Establishes a connection to Foreman
         """
         global SESSION
         self.SESSION = requests.Session()
@@ -92,17 +91,16 @@ class ForemanAPIClient:
 
     def get_hostname(self):
         """
-        Returns the configured hostname of the object instance.
+        Returns the configured hostname of the object instance
         """
         return self.HOSTNAME
 
     # TODO: find a nicer way to displaying _all_ the hits...
     def __api_request(self, method, sub_url, payload="", hits=1337, page=1):
         """
-        Sends a HTTP request to the Foreman API. This function requires
-        a valid HTTP method and a sub-URL (such as /hosts). Optionally,
-        you can also specify payload (for POST, DELETE, PUT) and hits/page
-        and a page number (when retrieving data using GET).
+        Sends a HTTP request to the Foreman API. This function requires a valid HTTP method and a
+        sub-URL (such as /hosts). Optionally, you can also specify payload (for POST, DELETE, PUT)
+        and hits/page and a page number (when retrieving data using GET).
         There are also alias functions available.
 
         :param method: HTTP request method (GET, POST, DELETE, PUT)
@@ -126,7 +124,6 @@ class ForemanAPIClient:
         # send request to API
         try:
             if method.lower() not in ["get", "post", "delete", "put"]:
-                # going home
                 raise SessionException("Illegal method '{}' specified".format(method))
 
             self.LOGGER.debug(
@@ -142,25 +139,21 @@ class ForemanAPIClient:
 
             # send request
             if method.lower() == "put":
-                # PUT
                 result = self.SESSION.put(
                     "{}{}".format(self.URL, sub_url),
                     data=payload, headers=my_headers, verify=self.VERIFY
                 )
             elif method.lower() == "delete":
-                # DELETE
                 result = self.SESSION.delete(
                     "{}{}".format(self.URL, sub_url),
                     data=payload, headers=my_headers, verify=self.VERIFY
                 )
             elif method.lower() == "post":
-                # POST
                 result = self.SESSION.post(
                     "{}{}".format(self.URL, sub_url),
                     data=payload, headers=my_headers, verify=self.VERIFY
                 )
             else:
-                # GET
                 result = self.SESSION.get(
                     "{}{}?per_page={}&page={}".format(
                         self.URL, sub_url, hits, page),
@@ -185,9 +178,8 @@ class ForemanAPIClient:
     # Aliases
     def api_get(self, sub_url, hits=1337, page=1):
         """
-        Sends a GET request to the Foreman API. This function requires a
-        sub-URL (such as /hosts) and - optionally - hits/page and page
-        definitons.
+        Sends a GET request to the Foreman API. This function requires a sub-URL (such as /hosts)
+        and - optionally - hits/page and page definitons.
 
         :param sub_url: relative path within the API tree (e.g. /hosts)
         :type sub_url: str
@@ -200,8 +192,8 @@ class ForemanAPIClient:
 
     def api_post(self, sub_url, payload):
         """
-        Sends a POST request to the Foreman API. This function requires a
-        sub-URL (such as /hosts/1) and payload data.
+        Sends a POST request to the Foreman API. This function requires a sub-URL (such as /hosts/1)
+        and payload data.
 
         :param sub_url: relative path within the API tree (e.g. /hosts)
         :type sub_url: str
@@ -212,8 +204,8 @@ class ForemanAPIClient:
 
     def api_delete(self, sub_url, payload):
         """
-        Sends a DELETE request to the Foreman API. This function requires a
-        sub-URL (such as /hosts/2) and payload data.
+        Sends a DELETE request to the Foreman API. This function requires a sub-URL
+        (such as /hosts/2) and payload data.
 
         :param sub_url: relative path within the API tree (e.g. /hosts)
         :type sub_url: str
@@ -224,8 +216,8 @@ class ForemanAPIClient:
 
     def api_put(self, sub_url, payload):
         """
-        Sends a PUT request to the Foreman API. This function requires a
-        sub-URL (such as /hosts/3) and payload data.
+        Sends a PUT request to the Foreman API. This function requires a sub-URL (such as /hosts/3)
+        and payload data.
 
         :param sub_url: relative path within the API tree (e.g. /hosts)
         :type sub_url: str
@@ -236,33 +228,32 @@ class ForemanAPIClient:
 
     def validate_api_support(self):
         """
-        Checks whether the API version on the Foreman server is supported.
-        Using older version than API v2 is not recommended. In this case, an
-        exception will be thrown.
+        Checks whether the API version on the Foreman server is supported. Using older version
+        than API v2 is not recommended. In this case, an exception will be thrown.
         """
         try:
-            # get api version
-            result_obj = json.loads(
-                self.api_get("/status")
-            )
+            # get API version
+            result_obj = json.loads(self.api_get("/status"))
             self.LOGGER.debug("API version %s found", result_obj["api_version"])
             if result_obj["api_version"] != self.API_MIN:
                 raise APILevelNotSupportedException(
                     "Your API version (%s) does not support the required calls."
-                    "You'll need API version %s - stop using historic"
-                    " software!", result_obj["api_version"], self.API_MIN
+                    "You'll need API version %s - stop using historic software!",
+                    result_obj["api_version"], self.API_MIN
                 )
         except ValueError as err:
             self.LOGGER.error(err)
             raise APILevelNotSupportedException("Unable to verify API version")
 
     def get_url(self):
-        """Returns the configured URL of the object instance"""
+        """
+        Returns the configured URL of the object instance
+        """
         return self.URL
 
     def get_name_by_id(self, object_id, api_object):
         """
-        Returns a Foreman object's name by its ID.
+        Returns a Foreman object's name by its ID
 
         param object_id: Foreman object ID
         type object_id: int
@@ -270,15 +261,13 @@ class ForemanAPIClient:
         type api_object: str
         """
         valid_objects = [
-            "hostgroup", "location", "organization", "environment",
-            "host", "user"
+            "hostgroup", "location", "organization", "environment", "host", "user"
         ]
         try:
             if api_object.lower() not in valid_objects:
                 # invalid type
                 raise ValueError(
-                    "Unable to lookup name by invalid field"
-                    " type '{}'".format(api_object)
+                    "Unable to lookup name by invalid field type '{}'".format(api_object)
                 )
             else:
                 # get ID by name
@@ -310,8 +299,7 @@ class ForemanAPIClient:
         :type api_object: str
         """
         valid_objects = [
-            "hostgroup", "location", "organization", "environment",
-            "host"
+            "hostgroup", "location", "organization", "environment", "host"
         ]
         filter_object = {
             "hostgroup": "title", "location": "name", "host": "name",
@@ -319,10 +307,8 @@ class ForemanAPIClient:
         }
         try:
             if api_object.lower() not in valid_objects:
-                # invalid type
                 raise ValueError(
-                    "Unable to lookup name by invalid field"
-                    " type '{}'".format(api_object)
+                    "Unable to lookup name by invalid field type '{}'".format(api_object)
                 )
             else:
                 # get ID by name
@@ -333,8 +319,7 @@ class ForemanAPIClient:
                 for entry in result_obj["results"]:
                     if entry[filter_object[api_object]].lower() == name.lower():
                         self.LOGGER.debug(
-                            "%s %s seems to have ID #%s",
-                            api_object, name, entry["id"]
+                            "%s %s seems to have ID #%s", api_object, name, entry["id"]
                         )
                         return entry["id"]
                 # not found
@@ -400,14 +385,12 @@ class ForemanAPIClient:
         """
         try:
             my_results = []
-            # get _all_ the results
             results = json.loads(
                 self.api_get(
                     '/../../foreman_tasks/api/tasks?search="{}"'
                     '&order="started_at DESC"'.format(task_name)
                 )
             )
-            # print results
             for result in results["results"]:
                 # validate date and host
                 host_info = result["input"]["host"]

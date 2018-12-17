@@ -26,7 +26,7 @@ class ContainerException(Exception):
     pass
 
 
-class AuthContainer:
+class AuthContainer(object):
     """
 .. class:: AuthContainer
     """
@@ -57,9 +57,7 @@ class AuthContainer:
         :param filename: filename
         :type filename: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
-        # set key if defined
         if key:
             self.set_key(key)
         # set filename and import data
@@ -71,7 +69,7 @@ class AuthContainer:
 
     def set_key(self, key):
         """
-        This function set or changes the key used for encryption/decryption.
+        Sets/changes the key used for encryption/decryption
 
         :param key: key
         :type key: str
@@ -79,20 +77,20 @@ class AuthContainer:
         try:
             # fill up to 32 chars
             key = key.zfill(32)[-32:]
-            # set key
             self.KEY = base64.b64encode(key)
         except ValueError:
             self.LOGGER.error("Empty password specified")
 
     def is_encrypted(self):
         """
-        This functions returns whether the authentication container is
-        encrypted.
+        Returns whether the authentication container is encrypted
         """
         return bool(self.KEY)
 
     def __import(self):
-        """This function imports definitions from the file."""
+        """
+        Imports definitions from the file
+        """
         global CREDENTIALS
 
         if os.path.exists(self.FILENAME) and \
@@ -104,7 +102,7 @@ class AuthContainer:
 
     def get_json(self, filename):
         """
-        Reads a JSON file and returns the whole content as one-liner.
+        Reads a JSON file and returns the whole content as one-liner
 
         :param filename: the JSON filename
         :type filename: str
@@ -118,7 +116,7 @@ class AuthContainer:
 
     def save(self):
         """
-        This function stores the changed authentication container to disk.
+        Stores the changed authentication container to disk
         """
         try:
             with open(self.FILENAME, 'w') as target:
@@ -132,10 +130,9 @@ class AuthContainer:
     def __manage_credentials(self, hostname, username, password,
                              remove_entry=False):
         """
-        This functions adds or removes credentials to/from the authentication
-        container.
-        Adding credentials requires a hostname, username and corresponding
-        password. Removing credentials only requires a hostname.
+        Adds/removes credentials to/from the authentication container.
+        Adding credentials requires a hostname, username and corresponding password.
+        Removing credentials only requires a hostname.
 
         There are two alias functions for credentials management:
         add_credentials() and remove_credentials()
@@ -154,7 +151,6 @@ class AuthContainer:
 
         try:
             if remove_entry:
-                # remove entry
                 del self.CREDENTIALS[hostname]
             else:
                 # add entry
@@ -175,7 +171,7 @@ class AuthContainer:
     # aliases
     def add_credentials(self, hostname, username, password):
         """
-        Adds credentials to the authentication container.
+        Adds credentials to the authentication container
 
         :param hostname: hostname
         :type hostname: str
@@ -188,7 +184,7 @@ class AuthContainer:
 
     def remove_credentials(self, hostname):
         """
-        Removes credentials from the authentication container.
+        Removes credentials from the authentication container
 
         :param hostname: hostname
         :type hostname: str
@@ -202,8 +198,8 @@ class AuthContainer:
     @staticmethod
     def cut_hostname(snippet):
         """
-        This function removes protocol pre- and postfix data in order to
-        find/create generic authentication information.
+        Removes protocol pre- and postfix data in order to find/create generic authentication
+        information
 
         :param snippet: connection string, URI/URL,...
         :type snippet: str
@@ -217,7 +213,7 @@ class AuthContainer:
 
     def get_credential(self, hostname):
         """
-        This function returns credentials for a particular hostname.
+        Returns credentials for a particular hostname
 
         :param hostname: hostname
         :type hostname: str

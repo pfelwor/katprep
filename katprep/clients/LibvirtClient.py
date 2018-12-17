@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Class for sending requests to libvirt
+Class for communicating with libvirt
 """
 
 from __future__ import print_function
 
-import libvirt
 import logging
+import libvirt
 from katprep.clients import SessionException, EmptySetException, \
     UnsupportedRequestException, InvalidCredentialsException
 
 
-class LibvirtClient:
+class LibvirtClient(object):
     """
     Class for communicating with libvirt
 
@@ -33,10 +33,9 @@ class LibvirtClient:
 
     def __init__(self, log_level, uri, username, password):
         """
-        Constructor, creating the class. It requires specifying a URI and
-        a username and password for communicating with the hypervisor.
-        The constructor will throw an exception if an invalid libvirt URI
-        was specified. After initialization, a connection is established
+        Constructor, creating the class. It requires specifying a URI and a username and password
+        for communicating with the hypervisor. The constructor will throw an exception if an
+        invalid libvirt URI was specified. After initialization, a connection is established
         automatically.
 
         :param log_level: log level
@@ -48,9 +47,7 @@ class LibvirtClient:
         :param password: corresponding password
         :type password: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
-        # validate and set URI
         if self.validate_uri(uri):
             self.URI = uri
         else:
@@ -63,9 +60,8 @@ class LibvirtClient:
     @staticmethod
     def validate_uri(uri):
         """
-        Verifies a libvirt URI and throws an exception if the URI is invalid.
-        This is done by checking if the URI contains one of the well-known
-        libvirt protocols.
+        Verifies a libvirt URI and throws an exception if the URI is invalid. This is done by
+        checking if the URI contains one of the well-known libvirt protocols.
 
         :param uri: a libvirt URI
         :type uri: str
@@ -82,7 +78,9 @@ class LibvirtClient:
         return False
 
     def __connect(self):
-        """This function establishes a connection to the hypervisor."""
+        """
+        This function establishes a connection to the hypervisor
+        """
         # create weirdo auth dict
         auth = [
             [libvirt.VIR_CRED_AUTHNAME, libvirt.VIR_CRED_PASSPHRASE],
@@ -96,16 +94,14 @@ class LibvirtClient:
         except libvirt.libvirtError:
             raise InvalidCredentialsException("Invalid credentials")
 
-    def retrieve_credentials(self, credentials, user_data):
+    def retrieve_credentials(self, credentials):
         """
-        Retrieves the libvirt credentials in a strange format and hand it to
-        the API in order to communicate with the hypervisor.
-        To be honest, I have no idea why this has to be done this way. I have
-        taken this function from the official libvirt documentation.
+        Retrieves the libvirt credentials in a strange format and hand it to the API in order to
+        communicate with the hypervisor. To be honest, I have no idea why this has to be done this
+        way. I have taken this function from the official libvirt documentation.
 
         :param credentials: libvirt credentials object
-        :param user_data: some data that will never be used
-        :type user_data: None
+        :type credentials: dict
         """
         # get credentials for libvirt
         for credential in credentials:
@@ -123,9 +119,8 @@ class LibvirtClient:
             self, vm_name, snapshot_title, snapshot_text, action="create"
     ):
         """
-        Creates/removes a snapshot for a particular virtual machine.
-        This requires specifying a VM, comment title and text.
-        There are also two alias functions.
+        Creates/removes a snapshot for a particular virtual machine. This requires specifying a VM,
+        comment title and text. There are also two alias functions.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -133,38 +128,37 @@ class LibvirtClient:
         :type snapshot_title: str
         :param snapshot_text: Snapshot text
         :type snapshot_text: str
-        :param remove_snapshot: Removes a snapshot if set to True
-        :type remove_snapshot: bool
+        :param action: Defines action (create, remove, revert)
+        :type action: str
 
         """
 
         try:
             target_vm = self.SESSION.lookupByName(vm_name)
             if action.lower() == "remove":
-                # remove snapshot
                 target_snap = target_vm.snapshotLookupByName(snapshot_title, 0)
                 return target_snap.delete(0)
             elif action.lower() == "revert":
-                # revert snapshot
                 target_snap = target_vm.snapshotLookupByName(snapshot_title, 0)
                 return target_vm.revertToSnapshot(target_snap)
             else:
-                # create snapshot
                 snap_xml = """<domainsnapshot><name>{}</name><description>{}
                     "</description></domainsnapshot>""".format(
-                    snapshot_title, snapshot_text
-                )
+                        snapshot_title, snapshot_text
+                    )
                 return target_vm.snapshotCreateXML(snap_xml, 0)
         except libvirt.libvirtError as err:
-            raise SessionException("Unable to {} snapshot: '{}'".format(
-                action.lower(), err)
+            raise SessionException(
+                "Unable to {} snapshot: '{}'".format(
+                    action.lower(), err
+                )
             )
 
     # Aliases
     def create_snapshot(self, vm_name, snapshot_title, snapshot_text):
         """
-        Creates a snapshot for a particular virtual machine.
-        This requires specifying a VM, comment title and text.
+        Creates a snapshot for a particular virtual machine. This requires specifying a VM,
+        comment title and text.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -177,8 +171,8 @@ class LibvirtClient:
 
     def remove_snapshot(self, vm_name, snapshot_title):
         """
-        Removes a snapshot for a particular virtual machine.
-        This requires specifying a VM and a comment title.
+        Removes a snapshot for a particular virtual machine. This requires specifying a VM and a
+        comment title.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -191,8 +185,8 @@ class LibvirtClient:
 
     def revert_snapshot(self, vm_name, snapshot_title):
         """
-        Reverts to  a snapshot for a particular virtual machine.
-        This requires specifying a VM and a comment title.
+        Reverts to  a snapshot for a particular virtual machine. This requires specifying a VM
+        and a comment title.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -205,8 +199,8 @@ class LibvirtClient:
 
     def has_snapshot(self, vm_name, snapshot_title):
         """
-        Returns whether a particular virtual machine is currently protected
-        by a snapshot. This requires specifying a VM name.
+        Returns whether a particular virtual machine is currently protected by a snapshot.
+        This requires specifying a VM name.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -224,20 +218,19 @@ class LibvirtClient:
                 # snapshot not found
                 raise EmptySetException("No snapshots found")
             else:
-                self.LOGGER.error("Unable to determine snapshot: '{}'".format(err))
+                self.LOGGER.error("Unable to determine snapshot: '%s'", err)
                 raise SessionException(err)
 
     def get_vm_ips(self):
         """
-        Returns a list of VMs and their IPs available through the current 
-        connection.
+        Returns a list of VMs and their IPs available through the current  connection
         """
         try:
             # get all VMs
             vms = self.SESSION.listDefinedDomains()
             result = []
 
-            # scan _all_ the VMs
+            # scan _all_ the VMs for relevant information
             for vm in vms:
                 # get VM and lookup hostname
                 target_vm = self.SESSION.lookupByName(vm)
@@ -258,14 +251,13 @@ class LibvirtClient:
     @staticmethod
     def get_vm_hosts():
         """
-        Returns a list of VMs and their hypervisors available through the
-        current connection.
+        Returns a list of VMs and their hypervisors available through the current connection
         """
         print("TODO: get_vm_hosts")
 
     def restart_vm(self, vm_name, force=False):
         """
-        Restarts a particular VM (default: soft reboot using guest tools).
+        Restarts a particular VM (default: soft reboot using guest tools)
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -292,13 +284,13 @@ class LibvirtClient:
     @staticmethod
     def powerstate_vm(vm_name):
         """
-        Returns the power state of a particular virtual machine.
+        Returns the power state of a particular virtual machine
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
 
         """
-        print("TODO: powerstate_vm")
+        print("TODO: powerstate_vm %s" % vm_name)
 
     @staticmethod
     def __manage_power(
@@ -313,12 +305,12 @@ class LibvirtClient:
         :type action: str
 
         """
-        print("TODO: manage_power")
+        print("TODO: manage_power %s %s" % action, vm_name)
 
     # Aliases
     def poweroff_vm(self, vm_name):
         """
-        Turns off a particual virtual machine forcefully.
+        Turns off a particual virtual machine forcefully
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -329,7 +321,7 @@ class LibvirtClient:
 
     def poweron_vm(self, vm_name):
         """
-        Turns on a particual virtual machine forecully.
+        Turns on a particual virtual machine forecully
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str

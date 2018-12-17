@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This file contains the SpacewalkAPIClient and
-depending exception classes
+Class for communicating with the Spacewalk / Uyuni API
 """
 
 import logging
@@ -18,7 +17,7 @@ except ImportError:
 
 class SpacewalkAPIClient(object):
     """
-    Class for communicating with the Spacewalk API
+    Class for communicating with the Spacewalk / Uyuni API
 
 .. class:: SpacewalkAPIClient
     """
@@ -61,9 +60,8 @@ class SpacewalkAPIClient(object):
 
     def __init__(self, log_level, hostname, username, password):
         """
-        Constructor, creating the class. It requires specifying a
-        hostname, username and password to access the API. After
-        initialization, a connected is established.
+        Constructor, creating the class. It requires specifying a hostname, username and password
+        to access the API. After initialization, a connected is established.
 
         :param log_level: log level
         :type log_level: logging
@@ -74,7 +72,6 @@ class SpacewalkAPIClient(object):
         :param password: corresponding password
         :type password: str
         """
-        # set logging
         logging.basicConfig(level=log_level)
         self.LOGGER.setLevel(log_level)
         self.LOGGER.debug(
@@ -100,7 +97,7 @@ class SpacewalkAPIClient(object):
 
     def __connect(self):
         """
-        This function establishes a connection to Spacewalk.
+        This function establishes a connection to Spacewalk
         """
         # set api session and key
         try:
@@ -118,9 +115,8 @@ class SpacewalkAPIClient(object):
 
     def validate_api_support(self):
         """
-        Checks whether the API version on the Spacewalk server is supported.
-        Using older versions than 11.1 is not recommended. In this case, an
-        exception will be thrown.
+        Checks whether the API version on the Spacewalk server is supported. Using older versions
+        than 11.1 is not recommended. In this case, an exception will be thrown.
         """
         try:
             # check whether API is supported
@@ -133,7 +129,7 @@ class SpacewalkAPIClient(object):
                     )
                 )
             else:
-                self.LOGGER.info("Supported API version (" + api_level + ") found.")
+                self.LOGGER.info("Supported API version (%s) found.", api_level)
         except ValueError as err:
             self.LOGGER.error(err)
             raise APILevelNotSupportedException("Unable to verify API version")

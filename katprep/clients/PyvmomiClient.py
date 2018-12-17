@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Class for sending requests to pyvmomi as libvirt is still
-just an endless pain when managing VMware products
+Class for sending requests to pyvmomi
 """
 
 import logging
@@ -22,6 +21,8 @@ except ImportError:
 
 class PyvmomiClient(object):
     """
+    Class for sending requests to pyvmomi
+
 .. class:: PyvmomiClient
     """
     LOGGER = logging.getLogger('PyvmomiClient')
@@ -35,10 +36,9 @@ class PyvmomiClient(object):
 
     def __init__(self, log_level, hostname, username, password):
         """
-        Constructor, creating the class. It requires specifying a URI and
-        a username and password for communicating with the hypervisor.
-        The constructor will throw an exception if an invalid libvirt URI
-        was specified. After initialization, a connection is established
+        Constructor, creating the class. It requires specifying a URI and a username and password
+        for communicating with the hypervisor. The constructor will throw an exception if an
+        invalid libvirt URI was specified. After initialization, a connection is established
         automatically.
 
         :param log_level: log level
@@ -50,7 +50,6 @@ class PyvmomiClient(object):
         :param password: corresponding password
         :type password: str
         """
-        # set logging
         self.LOGGER.setLevel(log_level)
         # set custom port
         parsed_uri = urlparse(hostname)
@@ -67,7 +66,9 @@ class PyvmomiClient(object):
         self.__connect()
 
     def __connect(self):
-        """This function establishes a connection to the hypervisor."""
+        """
+        Establishes a connection to the hypervisor
+        """
         global SESSION
         context = None
         # skip SSL verification for now
@@ -109,9 +110,8 @@ class PyvmomiClient(object):
             self, vm_name, snapshot_title, snapshot_text, action="create"
     ):
         """
-        Creates/removes a snapshot for a particular virtual machine.
-        This requires specifying a VM, comment title and text.
-        There are also two alias functions.
+        Creates/removes a snapshot for a particular virtual machine. This requires specifying a VM,
+        comment title and text. There are also two alias functions.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -137,20 +137,16 @@ class PyvmomiClient(object):
                     childs = snapshot.childSnapshotList
                     if snapshot.name == snapshot_title:
                         if action.lower() == "remove":
-                            # remove snapshot
                             snapshot.snapshot.RemoveSnapshot_Task(True)
                         else:
-                            # revert snapshot
                             snapshot.snapshot.RevertToSnapshot_Task()
                     if childs:
                         # also iterate through childs
                         for child in childs:
                             if child.name == snapshot_title:
                                 if action.lower() == "remove":
-                                    # remove snapshot
                                     child.snapshot.RemoveSnapshot_Task(True)
                                 else:
-                                    # revert snapshot
                                     child.snapshot.RevertToSnapshot_Task()
             else:
                 # only create snapshot if not already existing
@@ -169,7 +165,6 @@ class PyvmomiClient(object):
                     task = vm.CreateSnapshot(
                         snapshot_title, snapshot_text, dump_memory, quiesce
                     )
-
         except TypeError as err:
             raise SessionException(
                 "Unable to manage snapshot: '{}'".format(err)
@@ -186,8 +181,8 @@ class PyvmomiClient(object):
     # Aliases
     def create_snapshot(self, vm_name, snapshot_title, snapshot_text):
         """
-        Creates a snapshot for a particular virtual machine.
-        This requires specifying a VM, comment title and text.
+        Creates a snapshot for a particular virtual machine. This requires specifying a VM,
+        comment title and text.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -202,8 +197,8 @@ class PyvmomiClient(object):
 
     def remove_snapshot(self, vm_name, snapshot_title):
         """
-        Removes a snapshot for a particular virtual machine.
-        This requires specifying a VM and a comment title.
+        Removes a snapshot for a particular virtual machine. This requires specifying a VM
+        and a comment title.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -216,8 +211,8 @@ class PyvmomiClient(object):
 
     def revert_snapshot(self, vm_name, snapshot_title):
         """
-        Reverts to  a snapshot for a particular virtual machine.
-        This requires specifying a VM and a comment title.
+        Reverts to a snapshot for a particular virtual machine. This requires specifying a VM
+        and a comment title.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -231,12 +226,13 @@ class PyvmomiClient(object):
 
     def __get_snapshots(self, vm_name):
         """
-        Returns a set of all snapshots for a particular VM.
+        Returns a set of all snapshots for a particular VM
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
         """
         try:
+            # get container of all available VMs
             content = self.SESSION.RetrieveContent()
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.VirtualMachine], True
@@ -250,8 +246,8 @@ class PyvmomiClient(object):
 
     def has_snapshot(self, vm_name, snapshot_title):
         """
-        Returns whether a particular virtual machine is currently protected
-        by a snapshot. This requires specifying a VM name.
+        Returns whether a particular virtual machine is currently protected by a snapshot. This
+        requires specifying a VM name.
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -272,13 +268,11 @@ class PyvmomiClient(object):
                             return True
             raise EmptySetException("No snapshots found")
         except TypeError:
-            # no snapshots
             raise EmptySetException("No snapshots found")
 
     def get_vm_ips(self, hide_empty=True, ipv6_only=False):
         """
-        Returns a list of VMs and their IPs available through the current
-        connection.
+        Returns a list of VMs and their IPs available through the current connection
 
         :param hide_empty: hide VMs without network information
         :type hide_empty: bool
@@ -288,7 +282,6 @@ class PyvmomiClient(object):
         try:
             # get _all_ the VMs
             content = self.SESSION.RetrieveContent()
-            # result = {}
             result = []
             # create view cotaining VM objects
             object_view = content.viewManager.CreateContainerView(
@@ -343,8 +336,7 @@ class PyvmomiClient(object):
 
     def get_vm_hosts(self):
         """
-        Returns a list of VMs and their hypervisors available through the
-        current connection.
+        Returns a list of VMs and their hypervisors available through the current connection
         """
         try:
             # get _all_ the VMs
@@ -365,7 +357,7 @@ class PyvmomiClient(object):
 
     def restart_vm(self, vm_name, force=False):
         """
-        Restarts a particular VM (default: soft reboot using guest tools).
+        Restarts a particular VM (default: soft reboot using guest tools)
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -390,7 +382,7 @@ class PyvmomiClient(object):
 
     def powerstate_vm(self, vm_name):
         """
-        Returns the power state of a particular virtual machine.
+        Returns the power state of a particular virtual machine
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -416,7 +408,7 @@ class PyvmomiClient(object):
             self, vm_name, action="poweroff"
     ):
         """
-        Powers a particual virtual machine on/off forcefully.
+        Powers a particual virtual machine on/off forcefully
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -445,7 +437,7 @@ class PyvmomiClient(object):
     # Aliases
     def poweroff_vm(self, vm_name):
         """
-        Turns off a particual virtual machine forcefully.
+        Turns off a particual virtual machine forcefully
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str
@@ -456,7 +448,7 @@ class PyvmomiClient(object):
 
     def poweron_vm(self, vm_name):
         """
-        Turns on a particual virtual machine forcefully.
+        Turns on a particual virtual machine forcefully
 
         :param vm_name: Name of a virtual machine
         :type vm_name: str

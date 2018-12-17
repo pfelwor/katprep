@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=not-callable
 """
-A script which maintains entries in a authentication container.
+Maintains entries in a authentication container
 """
 
 from __future__ import absolute_import, print_function
@@ -29,11 +29,11 @@ AuthContainer: authentication container file
 
 def list_entries(options):
     """
-    This function lists entries from the authentication container.
+    Lists entries from the authentication container
     """
     for hostname in CONTAINER.get_hostnames():
-        # get credentials
         credentials = CONTAINER.get_credential(hostname)
+        # show password if requested
         if options.show_passwords:
             password = credentials[1]
         else:
@@ -45,16 +45,23 @@ def list_entries(options):
 
 def add(options):
     """
-    This function adds/modifies an entry to/from the authentication container.
+    Adds/modifies an entry to/from the authentication container
     """
+    # raw_input() was replaced by input() in Python 3
+    try:
+        input = raw_input
+    except NameError:
+        pass
+
+    # prompt for hostname and username
     while options.entry_hostname == "":
-        # prompt for hostname
-        options.entry_hostname = raw_input("Hostname: ")
+        options.entry_hostname = input("Hostname: ")
     while options.entry_username == "":
-        # prompt for hostname
-        options.entry_username = raw_input(
+        options.entry_username = input(
             "{} Username: ".format(options.entry_hostname)
         )
+
+    # prompt and verify password
     password_prompted = False
     while options.entry_password == "":
         # prompt for password
@@ -62,7 +69,6 @@ def add(options):
         options.entry_password = getpass.getpass(
             "{} Password: ".format(options.entry_hostname)
         )
-    # prompt again
     if not password_prompted:
         verification = options.entry_password
     else:
@@ -71,6 +77,8 @@ def add(options):
         verification = getpass.getpass(
             "Verify {} Password: ".format(options.entry_hostname)
         )
+
+    # store entry
     LOGGER.debug(
         "Adding entry hostname='%s', username='%s'...",
         options.entry_hostname, options.entry_username
@@ -83,11 +91,17 @@ def add(options):
 
 def remove(options):
     """
-    This function removes an entry from the authentication container.
+    Removes an entry from the authentication container
     """
+    # raw_input() was replaced by input() in Python 3
+    try:
+        input = raw_input
+    except NameError:
+        pass
+
+    # prompt hostname and remove entry
     while options.entry_hostname == "":
-        # prompt for hostname
-        options.entry_hostname = raw_input("Hostname: ")
+        options.entry_hostname = input("Hostname: ")
     LOGGER.debug(
         "Removing entry hostname='%s'...", options.entry_hostname
     )
@@ -97,7 +111,7 @@ def remove(options):
 
 def set_password(options):
     """
-    This function sets/changes/removes the authentication container password.
+    Sets/changes/removes the authentication container password
     """
     # get password and build new container
     if options.file_password:
@@ -108,6 +122,7 @@ def set_password(options):
     while len(new_pass) > 32:
         new_pass = getpass.getpass("New file password (max. 32 chars!): ")
     confirm = ""
+    # confirm new password
     while confirm != new_pass:
         confirm = getpass.getpass("Confirm password: ")
     new_container = AuthContainer(LOG_LEVEL, options.container[0], new_pass)
@@ -128,7 +143,9 @@ def set_password(options):
 
 
 def parse_options(args=None):
-    """Parses options and arguments."""
+    """
+    Parses options and arguments
+    """
     desc = '''%(prog)s is used for creating, modifying and
     removing entries in/from an authentication container.
     Authentication containers include various authentication credentials for
@@ -148,45 +165,65 @@ def parse_options(args=None):
 
     # GENERIC ARGUMENTS
     # -q / --quiet
-    gen_opts.add_argument("-q", "--quiet", action="store_true",
-                          dest="generic_quiet",
-                          default=False, help="don't print status messages to stdout (default: no)")
+    gen_opts.add_argument(
+        "-q", "--quiet", action="store_true", dest="generic_quiet", default=False,
+        help="don't print status messages to stdout (default: no)"
+    )
     # -d / --debug
-    gen_opts.add_argument("-d", "--debug", dest="generic_debug",
-                          default=False, action="store_true",
-                          help="enable debugging outputs (default: no)")
+    gen_opts.add_argument(
+        "-d", "--debug", dest="generic_debug", default=False, action="store_true",
+        help="enable debugging outputs (default: no)"
+    )
     # authentication container
-    gen_opts.add_argument('container', metavar='FILE', nargs=1,
-                          help='An authentication container', type=str)
+    gen_opts.add_argument(
+        'container', metavar='FILE', nargs=1, help='An authentication container', type=str
+    )
 
     # COMMANDS
-    subparsers = parser.add_subparsers(title='commands',
-                                       description='controlling maintenance stages',
-                                       help='additional help')
+    subparsers = parser.add_subparsers(
+        title='commands', description='controlling maintenance stages', help='additional help'
+    )
+
+    # list
     cmd_list = subparsers.add_parser("list", help="listing entries")
-    cmd_list.add_argument("-a", "--show-passwords", action="store_true",
-                          dest="show_passwords", default=False, help="also shows passwords "
-                                                                     "(default: no)")
+    cmd_list.add_argument(
+        "-a", "--show-passwords", action="store_true", dest="show_passwords", default=False,
+        help="also shows passwords (default: no)"
+    )
     cmd_list.set_defaults(func=list_entries)
 
+    # add
     cmd_add = subparsers.add_parser("add", help="adding/modifying entries")
-    cmd_add.add_argument("-H", "--hostname", action="store", default="",
-                         dest="entry_hostname", metavar="HOSTNAME", help="hostname entry")
-    cmd_add.add_argument("-u", "--username", action="store", default="",
-                         dest="entry_username", metavar="USERNAME", help="username")
-    cmd_add.add_argument("-p", "--password", action="store", default="",
-                         dest="entry_password", metavar="PASSWORD", help="corresponding password")
+    cmd_add.add_argument(
+        "-H", "--hostname", action="store", default="", dest="entry_hostname", metavar="HOSTNAME",
+        help="hostname entry"
+    )
+    cmd_add.add_argument(
+        "-u", "--username", action="store", default="", dest="entry_username", metavar="USERNAME",
+        help="username"
+    )
+    cmd_add.add_argument(
+        "-p", "--password", action="store", default="", dest="entry_password", metavar="PASSWORD",
+        help="corresponding password"
+    )
     cmd_add.set_defaults(func=add)
 
+    # remove
     cmd_remove = subparsers.add_parser("remove", help="removing entries")
-    cmd_remove.add_argument("-H", "--hostname", action="store", default="",
-                            dest="entry_hostname", metavar="HOSTNAME", help="hostname entry")
+    cmd_remove.add_argument(
+        "-H", "--hostname", action="store", default="", dest="entry_hostname", metavar="HOSTNAME",
+        help="hostname entry"
+    )
     cmd_remove.set_defaults(func=remove)
 
-    cmd_password = subparsers.add_parser("password", help="add/change/remove "
-                                                          "encryption password")
-    cmd_password.add_argument("-p", "--password", action="store",
-                              dest="file_password", metavar="PASSWORD", help="password")
+    # password
+    cmd_password = subparsers.add_parser(
+        "password", help="add/change/remove encryption password"
+    )
+    cmd_password.add_argument(
+        "-p", "--password", action="store", dest="file_password", metavar="PASSWORD",
+        help="password"
+    )
     cmd_password.set_defaults(func=set_password)
 
     # parse options and arguments
@@ -195,7 +232,9 @@ def parse_options(args=None):
 
 
 def main(options, args):
-    """Main function, starts the logic based on parameters."""
+    """
+    Starts the logic based on parameters
+    """
     global CONTAINER
 
     LOGGER.debug("Options: %s", options)
@@ -214,7 +253,7 @@ def main(options, args):
 
 def cli():
     """
-    This functions initializes the CLI interface
+    Initializes the CLI interface
     """
     global LOG_LEVEL
     (options, args) = parse_options()
