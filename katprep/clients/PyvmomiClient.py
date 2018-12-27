@@ -10,7 +10,7 @@ import sys
 from katprep.clients.katprep_shared import is_ipv4, is_ipv6
 from katprep.clients import SessionException, InvalidCredentialsException, \
     EmptySetException, SnapshotExistsException
-from pyVim.connect import SmartConnect, Disconnect
+from pyVim.connect import SmartConnect
 from pyVmomi import vim
 
 try:
@@ -124,7 +124,7 @@ class PyvmomiClient(object):
         :param snapshot_text: Snapshot text
         :type snapshot_text: str
         :param action: action (create, remove)
-        :type remove_snapshot: str
+        :type action: str
 
         """
         # make sure to quiesce and not dump memory

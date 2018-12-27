@@ -87,7 +87,7 @@ def get_host_param_from_report(report, host, param):
         return report[host]["params"][param]
 
 
-def manage_host_preparation(options, host, cleanup=False):
+def manage_host_preparation(options, host, cleanup_host=False):
     """
     Prepares/cleans up maintenance tasks for a particular host.
     This includes creating/removing snapshots and scheduled downtimes.
@@ -96,8 +96,8 @@ def manage_host_preparation(options, host, cleanup=False):
     :type options: argparse arguments
     :param host: hostname
     :type host: str
-    :param cleanup: Flag whether preparations should be undone (default: no)
-    :type cleanup: bool
+    :param cleanup_host: Flag whether preparations should be undone (default: no)
+    :type cleanup_host: bool
     """
     # create snapshot if applicable
     if not options.virt_skip_snapshot and \
@@ -116,7 +116,7 @@ def manage_host_preparation(options, host, cleanup=False):
             vm_name = host
 
         if options.generic_dry_run:
-            if cleanup:
+            if cleanup_host:
                 LOGGER.info(
                     "Host '%s' --> remove snapshot (katprep_%s@%s)",
                     host, REPORT_PREFIX, vm_name
@@ -131,7 +131,7 @@ def manage_host_preparation(options, host, cleanup=False):
                     pass
         else:
             try:
-                if cleanup:
+                if cleanup_host:
                     # remove snapshot
                     VIRT_CLIENTS[get_host_param_from_report(
                         REPORT, host, "katprep_virt")].remove_snapshot(
@@ -182,13 +182,13 @@ def manage_host_preparation(options, host, cleanup=False):
             mon_name = host
 
         if options.generic_dry_run:
-            if cleanup:
+            if cleanup_host:
                 LOGGER.info("Host '%s' --> remove downtime", host)
             else:
                 LOGGER.info("Host '%s' --> schedule downtime", host)
         else:
             try:
-                if cleanup:
+                if cleanup_host:
                     # remove downtime
                     MON_CLIENTS[get_host_param_from_report(
                         REPORT, host, "katprep_mon")].remove_downtime(mon_name, "host")
