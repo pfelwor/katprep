@@ -9,9 +9,14 @@ from katprep.clients import (SessionException, InvalidCredentialsException,
                              APILevelNotSupportedException)
 
 try:
+    # Python 3
+    # noinspection PyCompatibility
     from xmlrpc.server import SimpleXMLRPCServer as Server
+    # noinspection PyCompatibility
     from xmlrpc.client import Fault
 except ImportError:
+    # Python 2
+    # noinspection PyCompatibility
     from xmlrpclib import Server, Fault
 
 

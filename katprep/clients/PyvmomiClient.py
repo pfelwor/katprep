@@ -14,8 +14,12 @@ from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 
 try:
+    # Python 3
+    # noinspection PyCompatibility
     from urllib.parse import urlparse
 except ImportError:
+    # Python 2
+    # noinspection PyCompatibility
     from urlparse import urlparse
 
 

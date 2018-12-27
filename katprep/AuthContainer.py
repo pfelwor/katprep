@@ -12,8 +12,12 @@ import base64
 from cryptography.fernet import Fernet, InvalidToken
 
 try:
+    # Python 3
+    # noinspection PyCompatibility
     from urllib.parse import urlparse
 except ImportError:
+    # Python 2
+    # noinspection PyCompatibility
     from urlparse import urlparse
 
 
