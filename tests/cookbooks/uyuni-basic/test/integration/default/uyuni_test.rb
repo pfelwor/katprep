@@ -58,3 +58,31 @@ control 'app-05' do
     its('content') { should include 'uyuni' }
   end
 end
+
+control 'app-06' do
+  impact 1.0
+  title 'Installation files'
+  desc 'Ensure that the installation script was removed'
+  describe file ('/root/uyuni_initial_setup.sh') do
+    it { should_not exist }
+  end
+  describe file ('/root/.MANAGER_SETUP_COMPLETE') do
+    it { should exist }
+  end
+  describe file ('/root/.MANAGER_INITIALIZATION_COMPLETE') do
+    it { should exist }
+  end
+end
+
+# TODO: find a way to utilize node attributes?
+control 'app-07' do
+ impact 1.0
+ title 'Initial content created'
+ desc 'Ensure that the admin user and organization is created'
+ describe command('spacecmd -u vagrant -p vagrant org_list') do
+   its('stdout') { should include 'Vagrant' }
+ end
+ describe command('spacecmd -u vagrant -p vagrant user_list') do
+   its('stdout') { should include 'vagrant' }
+ end
+end

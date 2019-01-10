@@ -20,4 +20,5 @@ end
 # Uyuni packages
 zypper_package 'uyuni_packages' do
   package_name 'patterns-uyuni_server'
+  retries 5
 end

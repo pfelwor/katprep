@@ -1,0 +1,6 @@
+#!/bin/sh
+csrf="$(curl --insecure https://localhost/rhn/newlogin/CreateFirstUser.do | grep csrf | grep -o 'value=.*' | tr -d 'a-zA-Z">=')"
+curl --insecure -d "csrf_token=$csrf&submitted=true&orgName=<%= @uyuni['org_name'] %>&login=<%= @uyuni['admin_user'] %>&desiredpassword=<%= @uyuni['admin_pass'] %>&desiredpasswordConfirm=<%= @uyuni['admin_pass'] %>&email=<%= @uyuni['admin_mail'] %>&firstNames=<%= @uyuni['admin_name'] %>&lastName=<%= @uyuni['admin_surname'] %>" -X POST https://localhost/rhn/newlogin/CreateFirstUser.do
+if [ "$?" == "0" ]; then
+  touch /root/.MANAGER_INITIALIZATION_COMPLETE
+fi

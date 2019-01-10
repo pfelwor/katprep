@@ -14,14 +14,14 @@ control 'pkg-01' do
   end
 end
 
-#control 'pkg-02' do
-#  impact 1.0
-#  title 'Uyuni repository exists'
-#  desc 'Ensure that the uyuni repository exists'
-#  describe package(pkg) do
-#    it { should be_installed }
-#  end
-#end
+control 'pkg-02' do
+  impact 1.0
+  title 'Uyuni repository exists'
+  desc 'Ensure that the uyuni repository exists'
+  describe command('LANG=C zypper lr') do
+    its('stdout') { should include('uyuni-server-stable') }
+  end
+end
 
 control 'pkg-03' do
   impact 1.0
