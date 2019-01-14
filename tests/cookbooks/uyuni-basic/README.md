@@ -51,4 +51,4 @@ This section describes the InSpec profiles of this cookbook:
 
 Profile  | Description
 -------- | -----------
-uyuni | Checks Uyuni installation and basic content
+[uyuni](test/integration/default/uyuni) | Checks Uyuni installation and basic content
