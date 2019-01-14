@@ -2,7 +2,7 @@
 
 This profile verifies an Uyuni installation.
 
-Currently, only openSUSE 42.3 is supported - additional support will follow!
+Currently, only openSUSE 42.3 is supported - additional distributions will follow once Uyuni supports them.
 
 # Checks
 The following things are checked:
