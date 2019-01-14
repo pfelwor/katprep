@@ -1,9 +1,12 @@
 name 'uyuni-basic'
-maintainer 'The Authors'
-maintainer_email 'you@example.com'
-license 'All Rights Reserved'
-description 'Installs/Configures uyuni-basic'
-long_description 'Installs/Configures uyuni-basic'
+maintainer 'Christian Stankowic'
+maintainer_email 'info@cstan.io'
+license 'GPL-3.0'
+description 'Installs/Configures Uyuni'
+long_description 'Installs and configures Uyuni on openSUSE'
+recipe 'uyuni-basic::packages', 'Installs Uyuni packages'
+recipe 'uyuni-basic::uyuni', 'Deploys Uyuni'
+supports 'opensuse'
 version '0.1.0'
 chef_version '>= 12.14' if respond_to?(:chef_version)
 
