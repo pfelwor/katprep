@@ -75,14 +75,14 @@ control 'app-06' do
 end
 
 # TODO: find a way to utilize node attributes?
+uyuni_user = attribute('uyuni_username', description: 'Uyuni admin username', default: 'vagrant')
+uyuni_pass = attribute('uyuni_password', description: 'Uyuni admin password', default: 'vagrant')
 control 'app-07' do
  impact 1.0
  title 'Initial content created'
  desc 'Ensure that the admin user and organization is created'
- describe command('spacecmd -u vagrant -p vagrant org_list') do
-   its('stdout') { should include 'Vagrant' }
- end
- describe command('spacecmd -u vagrant -p vagrant user_list') do
-   its('stdout') { should include 'vagrant' }
+ describe uyuni('localhost', uyuni_user, uyuni_pass) do
+   its('users') { should include 'vagrant' }
+   its('orgs') { should include 'Vagrant' }
  end
 end

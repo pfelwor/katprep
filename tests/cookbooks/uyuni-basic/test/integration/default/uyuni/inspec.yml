@@ -1,0 +1,10 @@
+name: uyuni
+title: InSpec Profile for Uyuni
+maintainer: Christian Stankowic
+copyright: Christian Stankowic
+copyright_email: info@cstan.io
+license: GPLv3
+summary: Uyuni InSpec Profile
+version: 0.1.0
+supports:
+  platform: linux
