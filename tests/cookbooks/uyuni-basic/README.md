@@ -45,3 +45,10 @@ This recipe:
 - creates an environment file
 - deploys Uyuni via the installation utility
 - creates an admin user and an initial organization
+
+## Tests
+This section describes the InSpec profiles of this cookbook:
+
+Profile  | Description
+-------- | -----------
+uyuni | Checks Uyuni installation and basic content
