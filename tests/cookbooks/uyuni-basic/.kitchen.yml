@@ -23,5 +23,5 @@ suites:
       - recipe[uyuni-basic::default]
     verifier:
       inspec_tests:
-        - test/integration/default
+        - supermarket://stdevel/uyuni-inspec
     attributes:
